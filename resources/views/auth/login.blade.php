@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @extends('client.layout')
 
 @section('title', 'Login')
@@ -74,3 +75,26 @@ $(document).ready(function() {
 });
 </script>
 @endsection
+=======
+{{-- resources/views/auth/login.blade.php --}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Client Login</title>
+</head>
+<body>
+    <h1>Login Page</h1>
+
+    <form method="POST" action="{{ route('login') }}">
+        @csrf
+        <label>Email:</label>
+        <input type="email" name="email" required autofocus>
+
+        <label>Password:</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+>>>>>>> b97c7c6 (Push all files to SwiftRide repository)
