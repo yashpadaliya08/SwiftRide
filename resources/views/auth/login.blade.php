@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @extends('client.layout')
 
 @section('title', 'Login')
@@ -97,4 +96,3 @@ $(document).ready(function() {
     </form>
 </body>
 </html>
->>>>>>> b97c7c6 (Push all files to SwiftRide repository)
