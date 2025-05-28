@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Client Login / Register</title>
+    <title>Admin Login / Register</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- Bootstrap CSS -->
@@ -79,7 +79,8 @@
     <div class="tab-content">
         <!-- Login Form -->
         <div class="tab-pane fade show active" id="loginTab" role="tabpanel">
-            <form id="loginForm" method="POST" action="{{ route('login') }}">
+            <form id="loginForm" method="POST" action="{{ route('admin.login') }}">
+
                 @csrf
                 <div class="mb-3">
                     <label>Email</label>
@@ -99,7 +100,8 @@
 
         <!-- Register Form -->
         <div class="tab-pane fade" id="registerTab" role="tabpanel">
-            <form id="registerForm" method="POST" action="{{ route('register') }}">
+            <form id="registerForm" method="POST" action="{{ route('admin.register') }}">
+
                 @csrf
                 <div class="mb-3">
                     <label>Name</label>

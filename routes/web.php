@@ -29,6 +29,15 @@ Route::middleware('guest')->group(function () {
 });
 
 // --------------------
+// Admin Authentication (Tabbed Login/Register)
+// --------------------
+Route::middleware('guest:admin')->group(function () {
+    Route::get('/admin/auth', [AdminAuthController::class, 'showAuthForm'])->name('admin.auth');
+    Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
+    Route::post('/admin/register', [AdminAuthController::class, 'register'])->name('admin.register');
+});
+
+// --------------------
 // Authenticated Client Routes
 // --------------------
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -45,11 +54,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-    // --------------------
-    // Admin Routes
-    // --------------------
-    Route::prefix('admin')->name('admin.')->group(function () {
+// --------------------
+// Authenticated Admin Routes
+// --------------------
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth:admin', \App\Http\Middleware\AdminMiddleware::class])
+    ->group(function () {
         Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
         Route::get('/messages', [MessageController::class, 'index'])->name('messages');
         Route::resource('cars', CarController::class);
@@ -63,7 +76,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/reports', 'admin.reports')->name('reports');
         Route::view('/settings', 'admin.settings')->name('settings');
     });
-});
 
 // --------------------
 // Laravel Breeze Routes
