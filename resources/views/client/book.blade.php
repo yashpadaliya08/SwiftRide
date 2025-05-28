@@ -38,7 +38,7 @@
 
     @if($car)
         <div class="card shadow-lg border-0 rounded-4 p-4 bg-light">
-            <form action="{{ route('booking.store') }}" method="POST" class="row g-3">
+            <form action="{{ route('booking.store') }}" method="POST" class="row g-3" id="bookingForm">
                 @csrf
                 <input type="hidden" name="car_id" value="{{ $car->id }}">
 
@@ -105,5 +105,93 @@
             max-height: 250px;
         }
     }
+
+    /* Validation styles */
+    .is-valid {
+        border-color: #28a745 !important;
+        background-color: #e6ffed;
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-color: #ffe6e6;
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-weight: 500;
+        margin-top: 0.25rem;
+    }
+
+    .valid-feedback {
+        color: #28a745;
+        font-weight: 500;
+        margin-top: 0.25rem;
+    }
+
+    .animated {
+        animation-duration: 0.4s;
+        animation-fill-mode: both;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fadeInDown {
+        animation-name: fadeInDown;
+    }
 </style>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- jQuery & Validation Script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.19.5/jquery.validate.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    $("#bookingForm").validate({
+        rules: {
+            name: "required",
+            email: {
+                required: true,
+                email: true
+            },
+            phone: "required",
+            start_date: "required",
+            end_date: "required"
+        },
+        messages: {
+            name: "Please enter your full name",
+            email: "Please enter a valid email address",
+            phone: "Please enter your phone number",
+            start_date: "Please select a pickup date",
+            end_date: "Please select a return date"
+        },
+        errorElement: "div",
+        errorClass: "invalid-feedback animated fadeInDown",
+        highlight: function (element) {
+            $(element).addClass("is-invalid").removeClass("is-valid");
+        },
+        unhighlight: function (element) {
+            $(element).addClass("is-valid").removeClass("is-invalid");
+        },
+        success: function (label) {
+            label.addClass("valid-feedback").html('<i class="fas fa-check-circle text-success me-1"></i> Looks good!');
+        },
+        errorPlacement: function (error, element) {
+            error.insertAfter(element);
+        }
+    });
+});
+</script>
 @endsection

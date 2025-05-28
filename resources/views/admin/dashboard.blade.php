@@ -18,7 +18,7 @@
                         <i class="bi bi-car-front-fill fs-2 me-3"></i>
                         <div>
                             <h6 class="mb-1 text-uppercase">Total Cars</h6>
-                            <h4 class="mb-0 fw-bold">54</h4>
+                            <h4 class="mb-0 fw-bold">{{ $carCount }}</h4>
                         </div>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                         <i class="bi bi-calendar-check-fill fs-2 me-3"></i>
                         <div>
                             <h6 class="mb-1 text-uppercase">Total Bookings</h6>
-                            <h4 class="mb-0 fw-bold">120</h4>
+                            <h4 class="mb-0 fw-bold">{{$bookingCount  }}</h4>
                         </div>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                         <i class="bi bi-people-fill fs-2 me-3"></i>
                         <div>
                             <h6 class="mb-1 text-uppercase">Total Users</h6>
-                            <h4 class="mb-0 fw-bold">76</h4>
+                            <h4 class="mb-0 fw-bold">{{ $userCount }}</h4>
                         </div>
                     </div>
                 </div>

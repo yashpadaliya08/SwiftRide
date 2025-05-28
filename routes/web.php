@@ -10,6 +10,9 @@ use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Client\ClientAuthController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\UserController;
+
 
 // --------------------
 // Public Pages
@@ -64,15 +67,18 @@ Route::prefix('admin')
     ->middleware(['auth:admin', \App\Http\Middleware\AdminMiddleware::class])
     ->group(function () {
         Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])->name('dashboard');
+
         Route::get('/messages', [MessageController::class, 'index'])->name('messages');
         Route::resource('cars', CarController::class);
+        Route::get('/registered-users', [AdminDashboardController::class, 'registeredUsers'])->name('registered.users');
 
         Route::prefix('bookings')->name('bookings.')->group(function () {
             Route::get('/', [AdminBookingController::class, 'index'])->name('index');
             Route::get('/{id}', [AdminBookingController::class, 'show'])->name('show');
         });
 
-        Route::view('/users', 'admin.users')->name('users');
+        Route::get('/users', [AdminDashboardController::class, 'registeredUsers'])->name('users');
         Route::view('/reports', 'admin.reports')->name('reports');
         Route::view('/settings', 'admin.settings')->name('settings');
     });

@@ -13,11 +13,11 @@
             <i class="fas fa-info-circle me-1"></i> No messages found.
         </div>
     @else
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
+        <div class="card shadow-sm ">
+            <div class="card-body table-responsive">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
-                        <thead class="table-light">
+                    <table class="table table-hover table-bordered align-middle mb-0">
+                        <thead class="table-dark">
                             <tr>
                                 <th scope="col">#</th>
                                 <th scope="col">Name</th>
