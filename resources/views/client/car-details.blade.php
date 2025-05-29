@@ -31,6 +31,7 @@
                             </div>
 
                             <div class="mt-auto">
+                                {{-- Updated booking link to match web.php route --}}
                                 <a href="{{ route('book', ['car_id' => $car->id]) }}" class="btn btn-theme w-100">Book This Car</a>
                             </div>
                         </div>
@@ -41,7 +42,6 @@
     </div>  
 </div>
 
-<!-- 🌟 Custom Styles -->
 <style>
     .text-theme {
         color: #e74c3c;

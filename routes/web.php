@@ -1,67 +1,68 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CarController;
-use App\Http\Controllers\Client\CarBrowseController;
-use App\Http\Controllers\Client\BookingController as ClientBookingController;
-use App\Http\Controllers\ContactController;
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\MessageController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\AdminAuthController;
-use App\Http\Controllers\Client\ClientAuthController;
-use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\CarController;
+use App\Http\Controllers\Client\BookingController as ClientBookingController;
+use App\Http\Controllers\Client\CarBrowseController;
+use App\Http\Controllers\Client\ClientAuthController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ProfileController;
 
-
-// --------------------
-// Public Pages
-// --------------------
+// Public
 Route::view('/', 'client.home')->name('home');
 Route::view('/about', 'client.about')->name('about');
 Route::view('/contact', 'client.contact')->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
 
-// --------------------
-// Client Authentication (Tabbed Login/Register)
-// --------------------
+// Client Auth
 Route::middleware('guest')->group(function () {
     Route::get('/auth', [ClientAuthController::class, 'showAuthForm'])->name('client.auth');
     Route::post('/login', [ClientAuthController::class, 'login'])->name('login');
     Route::post('/register', [ClientAuthController::class, 'register'])->name('register');
 });
 
-// --------------------
-// Admin Authentication (Tabbed Login/Register)
-// --------------------
-Route::middleware('guest:admin')->group(function () {
+// Admin Auth
+Route::middleware('guest')->group(function () {
     Route::get('/admin/auth', [AdminAuthController::class, 'showAuthForm'])->name('admin.auth');
     Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
     Route::post('/admin/register', [AdminAuthController::class, 'register'])->name('admin.register');
 });
 
-// --------------------
-// Authenticated Client Routes
-// --------------------
+// Client Authenticated
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('/dashboard', 'client.dashboard')->name('dashboard');
+    Route::get('/dashboard', fn() => view('client.dashboard'))->name('dashboard');
 
-    // Car Browsing & Booking
     Route::get('/browse', [CarBrowseController::class, 'index'])->name('browse');
     Route::get('/car/{id}', [CarBrowseController::class, 'show'])->name('car.details');
-    Route::get('/book', [CarBrowseController::class, 'book'])->name('book');
-    Route::post('/book', [ClientBookingController::class, 'store'])->name('booking.store');
-    Route::get('/my_bookings', [ClientBookingController::class, 'index'])->name('my_bookings');
+
+    // Booking Flow
+    Route::prefix('booking')->name('booking.')->group(function () {
+        Route::get('/select', [ClientBookingController::class, 'selectCriteria'])->name('selectCriteria');
+        Route::post('/search', [ClientBookingController::class, 'handleSearch'])->name('handleSearch');
+        Route::get('/available', [ClientBookingController::class, 'showAvailableCars'])->name('available');
+
+        Route::post('/confirm', [ClientBookingController::class, 'confirm'])->name('confirm');
+        Route::post('/store', [ClientBookingController::class, 'storeConfirmed'])->name('store');
+        Route::get('/my-bookings', [ClientBookingController::class, 'myBookings'])->name('myBookings');
+    });
+
+    Route::get('/my_bookings', [ClientBookingController::class, 'myBookings'])->name('booking.myBookings');
 
     // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Logout
+    Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
 });
 
-// --------------------
-// Authenticated Admin Routes
-// --------------------
+// Admin
 Route::prefix('admin')
     ->name('admin.')
     ->middleware(['auth:admin', \App\Http\Middleware\AdminMiddleware::class])
@@ -82,7 +83,6 @@ Route::prefix('admin')
         Route::view('/reports', 'admin.reports')->name('reports');
         Route::view('/settings', 'admin.settings')->name('settings');
     });
-
 // --------------------
 // Laravel Breeze Routes
 // --------------------

@@ -9,7 +9,7 @@
     <div class="px-3 px-md-5">
         <h1 id="typing-text" class="display-4 fw-bold text-danger mb-3"></h1>
         <p class="lead mt-3 text-secondary">Find the perfect car for your journey — anytime, anywhere.</p>
-        <a href="{{ url('/browse') }}" class="btn btn-theme btn-lg mt-4 shadow-sm">Browse Available Cars</a>
+        <a href="{{ route('booking.selectCriteria') }}" class="btn btn-theme btn-lg mt-4 shadow-sm">Browse Available Cars</a>
     </div>
 </section>
 

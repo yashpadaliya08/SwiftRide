@@ -13,6 +13,7 @@
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">{{ $car->brand }} {{ $car->model }}</h5>
                         <p class="card-text mb-2 text-muted">₹{{ number_format($car->price_per_day) }} / day</p>
+                        {{-- Updated route to use named route 'car.details' --}}
                         <a href="{{ route('car.details', $car->id) }}" class="mt-auto btn btn-theme btn-sm w-100">View Details</a>
                     </div>
                 </div>
@@ -25,7 +26,6 @@
     </div>
 </div>
 
-<!-- 🌟 Styles -->
 <style>
     .theme-accent {
         color: #e74c3c;

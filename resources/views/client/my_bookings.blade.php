@@ -33,8 +33,8 @@
                                     <td>{{ $booking->id }}</td>
                                     <td>{{ $booking->name }}</td>
                                     <td>{{ $booking->car->brand ?? 'N/A' }} {{ $booking->car->model ?? '' }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($booking->start_date)->format('d M, Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($booking->end_date)->format('d M, Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($booking->start_datetime)->format('d M, Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($booking->end_datetime)->format('d M, Y') }}</td>
                                     <td>₹{{ number_format($booking->total_price ?? 0, 2) }}</td>
                                     <td>
                                         @if($booking->status == 'confirmed')
