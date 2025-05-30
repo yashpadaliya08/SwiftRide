@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Booking;
 use App\Models\Message;
 use App\Models\Car;
+use App\Models\Revenue;
 class AdminDashboardController extends Controller
 {
     public function index()
@@ -22,10 +23,12 @@ class AdminDashboardController extends Controller
     {
         $userCount = User::count();
         $bookingCount = Booking::count();
-        // $messageCount = Message::count();
         $carCount = Car::count();
 
-       return view('admin.dashboard', compact('userCount', 'bookingCount',  'carCount'));
+        // Recommended: use bookings for revenue
+        $totalRevenue = Booking::where('status', 'confirmed')->sum('total_price');
+
+        return view('admin.dashboard', compact('userCount', 'bookingCount', 'carCount', 'totalRevenue'));
     }
 
 }

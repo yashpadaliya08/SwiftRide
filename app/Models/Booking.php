@@ -16,7 +16,8 @@ class booking extends Model
         'dropoff_city',
         'start_datetime',
         'end_datetime',
-        'status',
+        'status' => 'confirmed',
+        'total_price',
     ];
 
 
@@ -29,6 +30,10 @@ class booking extends Model
     public function car()
     {
         return $this->belongsTo(Car::class);
+    }
+    public function revenues()
+    {
+        return $this->hasMany(Revenue::class);
     }
 
 }

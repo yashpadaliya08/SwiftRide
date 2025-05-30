@@ -27,10 +27,11 @@ class ClientAuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         // Add role to ensure only client users login here
-        if (Auth::attempt(array_merge($credentials, ['role' => 'client']))) {
+        if (Auth::guard('web')->attempt(array_merge($credentials, ['role' => 'client']))) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard'); // Make sure this exists
+            return redirect()->route('dashboard');
         }
+
 
         return back()->withErrors([
             'login' => 'Invalid credentials or not a client account.',
@@ -53,7 +54,7 @@ class ClientAuthController extends Controller
             'role' => 'client',
         ]);
 
-        Auth::login($user);
+        Auth::guard('web')->login($user);
 
         return redirect()->route('dashboard');
     }
@@ -61,11 +62,11 @@ class ClientAuthController extends Controller
     // Logout client
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Redirect to client tabbed login/register page
         return redirect()->route('client.auth');
+
     }
 }

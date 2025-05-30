@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('dropoff_city')->nullable();
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime');
-            $table->decimal('total_price', 8, 2)->after('model'); 
+            $table->decimal('total_price', 8, 2);
             $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
             $table->timestamps();
         });

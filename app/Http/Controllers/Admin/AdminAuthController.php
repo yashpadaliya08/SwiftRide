@@ -52,7 +52,8 @@ class AdminAuthController extends Controller
             'role' => 'admin',
         ]);
 
-        Auth::login($user);
+       Auth::guard('admin')->login($user);
+
         return redirect()->route('admin.dashboard');
     }
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\UserController;
@@ -12,18 +13,23 @@ use App\Http\Controllers\Client\CarBrowseController;
 use App\Http\Controllers\Client\ClientAuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Client\HomeController;
+
 
 // Public
 Route::view('/', 'client.home')->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('client.home');
 Route::view('/about', 'client.about')->name('about');
 Route::view('/contact', 'client.contact')->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
+Route::get('/cars', [CarController::class, 'index'])->name('cars.index');
 
 // Client Auth
 Route::middleware('guest')->group(function () {
     Route::get('/auth', [ClientAuthController::class, 'showAuthForm'])->name('client.auth');
-    Route::post('/login', [ClientAuthController::class, 'login'])->name('login');
-    Route::post('/register', [ClientAuthController::class, 'register'])->name('register');
+    Route::post('/login', [ClientAuthController::class, 'login'])->name('client.login');
+    Route::post('/register', [ClientAuthController::class, 'register'])->name('client.register');
+
 });
 
 // Admin Auth
@@ -49,6 +55,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/confirm', [ClientBookingController::class, 'confirm'])->name('confirm');
         Route::post('/store', [ClientBookingController::class, 'storeConfirmed'])->name('store');
         Route::get('/my-bookings', [ClientBookingController::class, 'myBookings'])->name('myBookings');
+        Route::patch('/my-bookings/{booking}/cancel', [ClientBookingController::class, 'cancel'])->name('cancel');
+
+
     });
 
     Route::get('/my_bookings', [ClientBookingController::class, 'myBookings'])->name('booking.myBookings');
@@ -77,10 +86,11 @@ Route::prefix('admin')
         Route::prefix('bookings')->name('bookings.')->group(function () {
             Route::get('/', [AdminBookingController::class, 'index'])->name('index');
             Route::get('/{id}', [AdminBookingController::class, 'show'])->name('show');
+             Route::post('/{id}/confirm', [App\Http\Controllers\Admin\BookingController::class, 'confirmBooking'])->name('confirm');
         });
 
         Route::get('/users', [AdminDashboardController::class, 'registeredUsers'])->name('users');
-        Route::view('/reports', 'admin.reports')->name('reports');
+        Route::get('/reports', [AdminReportController::class, 'reports'])->name('reports');
         Route::view('/settings', 'admin.settings')->name('settings');
     });
 // --------------------

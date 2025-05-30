@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Car;
+use App\Models\Revenue;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
 
 class BookingController extends Controller
 {
@@ -57,20 +59,8 @@ class BookingController extends Controller
                 ->withErrors(['end_time' => 'End time must be after start time'])->withInput();
         }
 
-        $adjustedStart = $start->copy()->subHours($this->bufferHours);
-        $adjustedEnd = $end->copy()->addHours($this->bufferHours);
-
-        $availableCars = Car::all()->filter(function ($car) use ($adjustedStart, $adjustedEnd) {
-            return !Booking::where('car_id', $car->id)
-                ->where(function ($query) use ($adjustedStart, $adjustedEnd) {
-                    $query->whereBetween('start_datetime', [$adjustedStart, $adjustedEnd])
-                        ->orWhereBetween('end_datetime', [$adjustedStart, $adjustedEnd])
-                        ->orWhere(function ($q) use ($adjustedStart, $adjustedEnd) {
-                            $q->where('start_datetime', '<', $adjustedStart)
-                                ->where('end_datetime', '>', $adjustedEnd);
-                        });
-                })
-                ->exists();
+        $availableCars = Car::all()->filter(function ($car) use ($start, $end) {
+            return !$this->hasConflict($car->id, $start, $end);
         });
 
         return view('client.booking.available_cars', [
@@ -116,7 +106,6 @@ class BookingController extends Controller
         ]);
     }
 
-
     public function storeConfirmed(Request $request)
     {
         $request->validate([
@@ -135,27 +124,18 @@ class BookingController extends Controller
         $start = Carbon::parse("{$request->start_date} {$request->start_time}");
         $end = Carbon::parse("{$request->end_date} {$request->end_time}");
 
-        $adjustedStart = $start->copy()->subHours($this->bufferHours);
-        $adjustedEnd = $end->copy()->addHours($this->bufferHours);
-
-        $conflict = Booking::where('car_id', $request->car_id)
-            ->where(function ($query) use ($adjustedStart, $adjustedEnd) {
-                $query->whereBetween('start_datetime', [$adjustedStart, $adjustedEnd])
-                    ->orWhereBetween('end_datetime', [$adjustedStart, $adjustedEnd])
-                    ->orWhere(function ($q) use ($adjustedStart, $adjustedEnd) {
-                        $q->where('start_datetime', '<', $adjustedStart)
-                            ->where('end_datetime', '>', $adjustedEnd);
-                    });
-            })->exists();
-
-        if ($conflict) {
+        if ($this->hasConflict($request->car_id, $start, $end)) {
             return redirect()->route('booking.selectCriteria')
                 ->withErrors(['conflict' => 'Selected car is not available at that time.'])->withInput();
         }
 
+        $car = Car::findOrFail($request->car_id);
+        $days = $start->diffInDays($end) + 1;
+        $total = $days * $car->price_per_day;
+
         Booking::create([
             'user_id' => Auth::id(),
-            'car_id' => $request->car_id,
+            'car_id' => $car->id,
             'pickup_city' => $request->pickup_city,
             'dropoff_city' => $request->dropoff_city,
             'start_datetime' => $start,
@@ -163,6 +143,7 @@ class BookingController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'total_price' => $total,
         ]);
 
         return redirect()->route('booking.myBookings')->with('success', 'Booking confirmed successfully!');
@@ -176,5 +157,85 @@ class BookingController extends Controller
             ->paginate(10);
 
         return view('client.my_bookings', compact('bookings'));
+    }
+
+    public function cancel($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        if ($booking->status === 'cancelled') {
+            return back()->with('error', 'Booking already cancelled.');
+        }
+
+        // 1. Update booking status
+        $booking->status = 'cancelled';
+        $booking->save();
+
+        // 2. Create refund revenue
+        Revenue::create([
+            'booking_id' => $booking->id,
+            'amount' => -$booking->total_price,
+            'type' => Revenue::TYPE_REFUND,
+            'status' => Revenue::STATUS_REFUNDED,
+        ]);
+
+        return back()->with('success', 'Booking cancelled and refund recorded.');
+    }
+
+public function myBookingsData(Request $request)
+{
+    $bookings = Booking::with('car')
+        ->where('user_id', Auth::id())
+        ->latest('start_datetime');
+
+    return DataTables::of($bookings)
+        ->addColumn('car', function ($b) {
+            return $b->car?->brand . ' ' . $b->car?->model ?? 'N/A';
+        })
+        ->addColumn('from', function ($b) {
+            return $b->start_datetime->format('d M, Y H:i');
+        })
+        ->addColumn('to', function ($b) {
+            return $b->end_datetime->format('d M, Y H:i');
+        })
+        ->addColumn('status_badge', function ($booking) {
+            // Dynamically override 'status' if currently active
+            $now = now();
+
+            if (
+                $booking->status === 'confirmed' &&
+                $booking->start_datetime <= $now &&
+                $booking->end_datetime >= $now
+            ) {
+                $booking->status = 'active';
+            }
+
+            return view('client.components.status_badge', ['booking' => $booking]);
+        })
+        ->addColumn('action', function ($b) {
+            return view('client.components.cancel_button', ['booking' => $b]);
+        })
+        ->rawColumns(['status_badge', 'action'])
+        ->make(true);
+}
+
+    // Reusable method to check booking conflicts considering buffer and canceled bookings
+    private function hasConflict(int $carId, Carbon $start, Carbon $end): bool
+    {
+        $adjustedStart = $start->copy()->subHours($this->bufferHours);
+        $adjustedEnd = $end->copy()->addHours($this->bufferHours);
+
+        return Booking::where('car_id', $carId)
+            ->where('status', '!=', 'cancelled')
+            ->where('end_datetime', '>=', $adjustedStart)
+            ->where(function ($query) use ($adjustedStart, $adjustedEnd) {
+                $query->whereBetween('start_datetime', [$adjustedStart, $adjustedEnd])
+                    ->orWhereBetween('end_datetime', [$adjustedStart, $adjustedEnd])
+                    ->orWhere(function ($q) use ($adjustedStart, $adjustedEnd) {
+                        $q->where('start_datetime', '<', $adjustedStart)
+                            ->where('end_datetime', '>', $adjustedEnd);
+                    });
+            })
+            ->exists();
     }
 }

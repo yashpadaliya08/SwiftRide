@@ -33,7 +33,7 @@
                         <i class="bi bi-calendar-check-fill fs-2 me-3"></i>
                         <div>
                             <h6 class="mb-1 text-uppercase">Total Bookings</h6>
-                            <h4 class="mb-0 fw-bold">{{$bookingCount  }}</h4>
+                            <h4 class="mb-0 fw-bold">{{ $bookingCount  }}</h4>
                         </div>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                         <i class="bi bi-currency-dollar fs-2 me-3"></i>
                         <div>
                             <h6 class="mb-1 text-uppercase">Revenue</h6>
-                            <h4 class="mb-0 fw-bold">$5,420</h4>
+                            <h4 class="mb-0 fw-bold">{{ $totalRevenue }}</h4>
                         </div>
                     </div>
                 </div>
