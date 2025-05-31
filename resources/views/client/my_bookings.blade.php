@@ -37,12 +37,14 @@
                                         <td>{{ \Carbon\Carbon::parse($booking->end_datetime)->format('d M, Y h:i A') }}</td>
                                         <td>₹{{ number_format($booking->total_price ?? 0, 2) }}</td>
                                         <td>
-                                            @if($booking->status == 'pending')
+                                            @if($booking->status === 'confirmed')
+                                                <span class="badge bg-info">Confirmed</span>
+                                            @elseif($booking->status === 'pending')
                                                 <span class="badge bg-warning text-dark">Pending</span>
-                                            @elseif($booking->status == 'confirmed')
-                                                <span class="badge bg-success">Confirmed</span>
-                                            @elseif($booking->status == 'cancelled')
+                                            @elseif($booking->status === 'cancelled')
                                                 <span class="badge bg-danger">Cancelled</span>
+                                            @elseif($booking->status === 'completed')
+                                                <span class="badge bg-success">Completed</span>
                                             @else
                                                 <span class="badge bg-secondary">Unknown</span>
                                             @endif
@@ -104,36 +106,36 @@
 
     <script>
         $(document).ready(function () {
-    $('#bookings-table').DataTable({
-        "paging": true,
-        "lengthChange": false,
-        "searching": true,
-        "ordering": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-        "language": {
-            search: "_INPUT_",
-            searchPlaceholder: "Search bookings..."
-        },
-        "columnDefs": [
-            { targets: [0], className: "fw-bold" }, // ID bold
-            { targets: '_all', className: "align-middle" }
-        ]
-    });
+            $('#bookings-table').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search bookings..."
+                },
+                "columnDefs": [
+                    { targets: [0], className: "fw-bold" }, // ID bold
+                    { targets: '_all', className: "align-middle" }
+                ]
+            });
 
-    $('.cancel-btn').on('click', function () {
-        let bookingId = $(this).data('booking-id');
-        let cancelUrl = `{{ url('booking/my-bookings') }}/${bookingId}/cancel`;
-        $('#cancelForm').attr('action', cancelUrl);
-    });
-});
+            $('.cancel-btn').on('click', function () {
+                let bookingId = $(this).data('booking-id');
+                let cancelUrl = `{{ url('booking/my-bookings') }}/${bookingId}/cancel`;
+                $('#cancelForm').attr('action', cancelUrl);
+            });
+        });
 
     </script>
 @endsection
 
 <style>
- .text-theme {
+    .text-theme {
         color: #e74c3c;
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 
 class booking extends Model
 {
@@ -35,5 +36,13 @@ class booking extends Model
     {
         return $this->hasMany(Revenue::class);
     }
+
+    public static function autoCompleteExpiredBookings()
+    {
+        return self::where('status', '!=', 'completed')
+            ->where('end_datetime', '<', Carbon::now())
+            ->update(['status' => 'completed']);
+    }
+
 
 }

@@ -19,7 +19,6 @@
                         <th scope="col">Email</th>
                         <th scope="col">Password</th>
                         <th scope="col">Registered On</th>
-                        <th scope="col">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,11 +29,6 @@
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->password}}</td>
                             <td>{{ $user->created_at->format('Y-m-d') }}</td>
-                            <td>
-                                <span class="badge {{ $user->is_active ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $user->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
                         </tr>
                     @empty
                         <tr>

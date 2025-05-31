@@ -26,9 +26,14 @@ class AdminDashboardController extends Controller
         $carCount = Car::count();
 
         // Recommended: use bookings for revenue
-        $totalRevenue = Booking::where('status', 'confirmed')->sum('total_price');
+        $totalRevenue = Booking::whereIn('status', ['confirmed', 'completed'])->sum('total_price');
 
-        return view('admin.dashboard', compact('userCount', 'bookingCount', 'carCount', 'totalRevenue'));
+        $recentBookings = Booking::with(['user', 'car'])
+        ->latest()
+        ->take(5)
+        ->get();
+
+        return view('admin.dashboard', compact('userCount', 'bookingCount', 'carCount', 'totalRevenue' ,'recentBookings'));
     }
 
 }

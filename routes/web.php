@@ -33,7 +33,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // Admin Auth
-Route::middleware('guest')->group(function () {
+Route::middleware('web')->group(function () {
     Route::get('/admin/auth', [AdminAuthController::class, 'showAuthForm'])->name('admin.auth');
     Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
     Route::post('/admin/register', [AdminAuthController::class, 'register'])->name('admin.register');

@@ -10,28 +10,32 @@ use App\Models\Booking;
 
 class AdminReportController extends Controller
 {
-    public function reports()
-    {
-        // Total registered users
-        $totalUsers = User::count();
+  public function reports()
+  {
 
-        // Total completed rides/bookings
-        $totalRides = Booking::where('status', 'completed')->count();
+    Booking::autoCompleteExpiredBookings();
 
-        // Total revenue from completed bookings
-       $totalRevenue = Booking::where('status', 'completed')->sum('total_price');
+    // Total registered users
+    $totalUsers = User::count();
+
+    // Total completed rides/bookings
+    $totalRides = Booking::where('status', 'completed')->count();
+
+    // Total revenue from completed bookings
+    $totalRevenue = Booking::whereIn('status', ['confirmed', 'completed'])->sum('total_price');
 
 
-        // Active drivers (assuming 'drivers' table or users with role=driver & active)
-      //  $activeDrivers = Driver::where('status', 'active')->count(); 
-        // Or: User::where('role', 'driver')->where('status', 'active')->count();
 
-        // Recent rides
-        $recentRides = Booking::with(['user']) // eager load relations
-                        ->latest()
-                        ->take(5)
-                        ->get();
+    // Active drivers (assuming 'drivers' table or users with role=driver & active)
+    //  $activeDrivers = Driver::where('status', 'active')->count(); 
+    // Or: User::where('role', 'driver')->where('status', 'active')->count();
 
-        return view('admin.reports', compact('totalUsers', 'totalRides', 'totalRevenue',  'recentRides'));
-    }
+    // Recent rides
+    $recentRides = Booking::with(['user']) // eager load relations
+      ->latest()
+      ->take(5)
+      ->get();
+
+    return view('admin.reports', compact('totalUsers', 'totalRides', 'totalRevenue', 'recentRides'));
+  }
 }

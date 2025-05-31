@@ -22,10 +22,10 @@
 
         @php
             $cities = ['Rajkot', 'Ahmedabad', 'Vadodara', 'Surat', 'Jamnagar'];
+            $bufferHours = 8;
         @endphp
 
-        <!-- ✅ FORM SUBMITS TO booking.handleSearch (POST) -->
-        <form id="bookingForm" action="{{ route('booking.handleSearch') }}" method="POST">
+        <form id="bookingForm" action="{{ route('booking.handleSearch') }}" method="POST" novalidate>
             @csrf
 
             <div class="row mb-3">
@@ -78,28 +78,170 @@
 @endsection
 
 @section('scripts')
-    <!-- ✅ Include jQuery and jQuery Validation (if not already included in layout) -->
+    <!-- jQuery & jQuery Validation -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 
     <script>
-        $(document).ready(function () {
+        $(function () {
+            const bufferHours = {{ $bufferHours }};
+            const now = new Date();
+            const minDateTime = new Date(now.getTime() + bufferHours * 60 * 60 * 1000);
+
+            // Format date as yyyy-mm-dd (for input[type=date])
+            function formatDate(date) {
+                return date.toISOString().split('T')[0];
+            }
+
+            // Format time as HH:mm (for input[type=time])
+            function formatTime(date) {
+                return date.toTimeString().slice(0, 5);
+            }
+
+            // Set minimum start date to buffer-adjusted current date
+            $('#start_date').attr('min', formatDate(minDateTime));
+
+            // If start_date is today (minDateTime), set start_time min else remove min
+            function updateStartTimeMin() {
+                const startDateVal = $('#start_date').val();
+                const todayStr = formatDate(minDateTime);
+                if (startDateVal === todayStr) {
+                    $('#start_time').attr('min', formatTime(minDateTime));
+                } else {
+                    $('#start_time').removeAttr('min');
+                }
+            }
+            updateStartTimeMin();
+
+            // When start_date changes, update start_time min and also end_date min
+            $('#start_date').on('change', function () {
+                updateStartTimeMin();
+
+                const startDate = $(this).val();
+                if (startDate) {
+                    $('#end_date').attr('min', startDate);
+
+                    // If end_date < start_date, reset end_date and end_time
+                    if ($('#end_date').val() && $('#end_date').val() < startDate) {
+                        $('#end_date').val('');
+                        $('#end_time').val('');
+                    }
+                } else {
+                    $('#end_date').removeAttr('min');
+                }
+                // Update end_time min based on end_date value
+                updateEndTimeMin();
+            });
+
+            // When start_time changes, update end_date min (if start_date set)
+            $('#start_time').on('change', function () {
+                const startDate = $('#start_date').val();
+                if (startDate) {
+                    $('#end_date').attr('min', startDate);
+                }
+                updateEndTimeMin();
+            });
+
+            // Update minimum end_time when end_date changes or start_date/time changes
+            function updateEndTimeMin() {
+                const startDate = $('#start_date').val();
+                const startTime = $('#start_time').val();
+                const endDate = $('#end_date').val();
+
+                if (!startDate || !startTime || !endDate) {
+                    $('#end_time').removeAttr('min');
+                    return;
+                }
+
+                if (endDate === startDate) {
+                    // Set end_time min to start_time + 1 minute to enforce > start datetime
+                    const startDateTime = new Date(`${startDate}T${startTime}`);
+                    const minEndTimeDate = new Date(startDateTime.getTime() + 60000); // +1 minute
+                    $('#end_time').attr('min', formatTime(minEndTimeDate));
+
+                    // If current end_time < min, reset end_time
+                    const currentEndTime = $('#end_time').val();
+                    if (currentEndTime && currentEndTime < formatTime(minEndTimeDate)) {
+                        $('#end_time').val('');
+                    }
+                } else {
+                    // Different end_date, no minimum time restriction
+                    $('#end_time').removeAttr('min');
+                }
+            }
+
+            $('#end_date').on('change', updateEndTimeMin);
+
+            // Custom jQuery Validation methods
+
+            $.validator.addMethod("startAfterBuffer", function (value, element) {
+                const startDate = $('#start_date').val();
+                const startTime = $('#start_time').val();
+
+                if (!startDate || !startTime) return true;
+
+                const startDateTime = new Date(`${startDate}T${startTime}`);
+                const nowBuffer = new Date(new Date().getTime() + bufferHours * 60 * 60 * 1000);
+
+                return startDateTime >= nowBuffer;
+            }, `Start date & time must be at least ${bufferHours} hour(s) from now`);
+
+            $.validator.addMethod("endAfterStart", function (value, element) {
+                const startDate = $('#start_date').val();
+                const startTime = $('#start_time').val();
+                const endDate = $('#end_date').val();
+                const endTime = $('#end_time').val();
+
+                if (!startDate || !startTime || !endDate || !endTime) return true;
+
+                const startDateTime = new Date(`${startDate}T${startTime}`);
+                const endDateTime = new Date(`${endDate}T${endTime}`);
+
+                return endDateTime > startDateTime;
+            }, "End date & time must be after start date & time");
+
+            $.validator.addMethod("endAfterBuffer", function (value, element) {
+                const endDate = $('#end_date').val();
+                const endTime = $('#end_time').val();
+
+                if (!endDate || !endTime) return true;
+
+                const endDateTime = new Date(`${endDate}T${endTime}`);
+                const nowBuffer = new Date(new Date().getTime() + bufferHours * 60 * 60 * 1000);
+
+                return endDateTime >= nowBuffer;
+            }, `End date & time must be at least ${bufferHours} hour(s) from now`);
+
             $('#bookingForm').validate({
                 rules: {
                     pickup_city: { required: true },
                     dropoff_city: { required: true },
-                    start_date: { required: true, date: true },
-                    start_time: { required: true },
-                    end_date: { required: true, date: true },
-                    end_time: { required: true }
+                    start_date: { required: true, date: true, startAfterBuffer: true },
+                    start_time: { required: true, startAfterBuffer: true },
+                    end_date: { required: true, date: true, endAfterStart: true, endAfterBuffer: true },
+                    end_time: { required: true, endAfterStart: true, endAfterBuffer: true }
                 },
                 messages: {
                     pickup_city: "Please select a pickup city",
                     dropoff_city: "Please select a dropoff city",
-                    start_date: "Please select a start date",
-                    start_time: "Please select a start time",
-                    end_date: "Please select an end date",
-                    end_time: "Please select an end time"
+                    start_date: {
+                        required: "Please select a start date",
+                        startAfterBuffer: `Start date & time must be at least ${bufferHours} hour(s) from now`
+                    },
+                    start_time: {
+                        required: "Please select a start time",
+                        startAfterBuffer: `Start date & time must be at least ${bufferHours} hour(s) from now`
+                    },
+                    end_date: {
+                        required: "Please select an end date",
+                        endAfterStart: "End date & time must be after start date & time",
+                        endAfterBuffer: `End date & time must be at least ${bufferHours} hour(s) from now`
+                    },
+                    end_time: {
+                        required: "Please select an end time",
+                        endAfterStart: "End date & time must be after start date & time",
+                        endAfterBuffer: `End date & time must be at least ${bufferHours} hour(s) from now`
+                    }
                 },
                 errorClass: 'text-danger',
                 errorElement: 'div',
