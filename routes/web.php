@@ -29,8 +29,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth', [ClientAuthController::class, 'showAuthForm'])->name('client.auth');
     Route::post('/login', [ClientAuthController::class, 'login'])->name('client.login');
     Route::post('/register', [ClientAuthController::class, 'register'])->name('client.register');
-
+    
 });
+Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
 
 // Admin Auth
 Route::middleware('web')->group(function () {
@@ -68,7 +69,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Logout
-    Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
+
 });
 
 // Admin
@@ -86,12 +87,13 @@ Route::prefix('admin')
         Route::prefix('bookings')->name('bookings.')->group(function () {
             Route::get('/', [AdminBookingController::class, 'index'])->name('index');
             Route::get('/{id}', [AdminBookingController::class, 'show'])->name('show');
-             Route::post('/{id}/confirm', [App\Http\Controllers\Admin\BookingController::class, 'confirmBooking'])->name('confirm');
+            Route::post('/{id}/confirm', [App\Http\Controllers\Admin\BookingController::class, 'confirmBooking'])->name('confirm');
         });
 
         Route::get('/users', [AdminDashboardController::class, 'registeredUsers'])->name('users');
         Route::get('/reports', [AdminReportController::class, 'reports'])->name('reports');
         Route::view('/settings', 'admin.settings')->name('settings');
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
     });
 // --------------------
 // Laravel Breeze Routes

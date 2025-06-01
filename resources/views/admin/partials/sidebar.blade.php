@@ -49,7 +49,7 @@
            class="d-flex align-items-center text-white text-decoration-none">
             <i class="fas fa-sign-out-alt me-2"></i> Logout
         </a>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+        <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
             @csrf
         </form>
     </div>
