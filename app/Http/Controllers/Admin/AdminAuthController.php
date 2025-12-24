@@ -60,8 +60,11 @@ class AdminAuthController extends Controller
     // Admin logout
     public function logout(Request $request)
     {
+        // Only logout from admin guard, don't invalidate entire session
+        // This allows client to remain logged in if they're also logged in
         Auth::guard('admin')->logout();
-        $request->session()->invalidate();
+        
+        // Regenerate CSRF token for security (doesn't affect other guards)
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.auth');

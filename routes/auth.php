@@ -12,22 +12,21 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 
 // --------------------
-// Combined Client Login/Register Page (Tabbed UI)
-// --------------------
-Route::get('/auth', function () {
-    return view('auth.client_auth');
-})->middleware('guest')->name('client.auth');
-
-// --------------------
 // Guest Routes (Login, Register, Forgot Password)
+// Note: Client registration/login is handled in web.php via ClientAuthController
+// These routes redirect to /auth which is handled by ClientAuthController in web.php
 // --------------------
 Route::middleware('guest')->group(function () {
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('client.login');
+    // Redirect old Breeze routes to our custom auth page
+    Route::get('login', function () {
+        return redirect('/auth');
+    })->name('login');
+    
+    Route::get('register', function () {
+        return redirect('/auth');
+    })->name('register');
 
-    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('register', [RegisteredUserController::class, 'store'])->name('client.register');
-
+    // Password reset routes (if needed)
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
 

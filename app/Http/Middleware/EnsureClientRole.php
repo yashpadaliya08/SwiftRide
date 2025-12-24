@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminMiddleware
+class EnsureClientRole
 {
     /**
      * Handle an incoming request.
@@ -16,22 +16,23 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = Auth::guard('admin')->user();
+        $user = Auth::guard('web')->user();
         
         if (!$user) {
-            return redirect()->route('admin.auth')->withErrors([
-                'auth' => 'Please login to access admin panel.',
+            return redirect()->route('client.auth')->withErrors([
+                'auth' => 'Please login to access this page.',
             ]);
         }
 
-        // Check if user has admin role
-        if ($user->role !== 'admin') {
-            Auth::guard('admin')->logout();
-            return redirect()->route('admin.auth')->withErrors([
-                'auth' => 'Access denied. Admin accounts only.',
+        // Check if user has client role (database uses 'user' for clients)
+        if ($user->role !== 'user') {
+            Auth::guard('web')->logout();
+            return redirect()->route('client.auth')->withErrors([
+                'auth' => 'Access denied. Client accounts only.',
             ]);
         }
 
         return $next($request);
     }
 }
+

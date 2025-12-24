@@ -21,3 +21,17 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Development documentation files (should not be committed)
+AUTHENTICATION_FIXES.md
+CODE_REVIEW_GUIDE.md
+EMAIL_CONFIGURATION_SUMMARY.md
+EMAIL_SETUP_COMPLETE.md
+EMAIL_SETUP_GUIDE.md
+FILES_TO_REVIEW.md
+LOGOUT_FIX.md
+QUICK_EMAIL_SETUP.md
+REGISTRATION_FIX.md
+TODO.md
+USAGE_GUIDE.md
+todo

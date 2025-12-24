@@ -24,24 +24,22 @@ Route::view('/contact', 'client.contact')->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
 Route::get('/cars', [CarController::class, 'index'])->name('cars.index');
 
-// Client Auth
-Route::middleware('guest')->group(function () {
+// Client Auth - Only accessible when NOT logged in as client
+Route::middleware('guest:web')->group(function () {
     Route::get('/auth', [ClientAuthController::class, 'showAuthForm'])->name('client.auth');
     Route::post('/login', [ClientAuthController::class, 'login'])->name('client.login');
     Route::post('/register', [ClientAuthController::class, 'register'])->name('client.register');
-    
 });
-Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
 
-// Admin Auth
-Route::middleware('web')->group(function () {
+// Admin Auth - Only accessible when NOT logged in as admin
+Route::middleware('guest:admin')->group(function () {
     Route::get('/admin/auth', [AdminAuthController::class, 'showAuthForm'])->name('admin.auth');
     Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
     Route::post('/admin/register', [AdminAuthController::class, 'register'])->name('admin.register');
 });
 
-// Client Authenticated
-Route::middleware(['auth', 'verified'])->group(function () {
+// Client Authenticated - Must be logged in as client (web guard) with client role
+Route::middleware(['auth:web', \App\Http\Middleware\EnsureClientRole::class, 'verified'])->group(function () {
     Route::get('/dashboard', fn() => view('client.dashboard'))->name('dashboard');
 
     Route::get('/browse', [CarBrowseController::class, 'index'])->name('browse');
@@ -68,8 +66,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Logout
-
+    // Client Logout
+    Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
 });
 
 // Admin

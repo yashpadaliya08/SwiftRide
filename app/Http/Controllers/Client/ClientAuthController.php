@@ -26,10 +26,15 @@ class ClientAuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        // Add role to ensure only client users login here
-        if (Auth::guard('web')->attempt(array_merge($credentials, ['role' => 'client']))) {
-            $request->session()->regenerate();
-            return redirect()->route('dashboard');
+        // Try to authenticate with client role
+        // Check if user exists and has client/user role
+        $user = User::where('email', $credentials['email'])->first();
+        
+        if ($user && ($user->role === 'client' || $user->role === 'user')) {
+            if (Auth::guard('web')->attempt($credentials)) {
+                $request->session()->regenerate();
+                return redirect()->route('dashboard');
+            }
         }
 
 
@@ -47,11 +52,12 @@ class ClientAuthController extends Controller
             'password' => ['required', 'min:6', 'confirmed'],
         ]);
 
+        // Use 'user' role to match database enum, but treat as client
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'client',
+            'role' => 'user', // Database enum uses 'user' not 'client'
         ]);
 
         Auth::guard('web')->login($user);
@@ -62,11 +68,13 @@ class ClientAuthController extends Controller
     // Logout client
     public function logout(Request $request)
     {
+        // Only logout from web guard, don't invalidate entire session
+        // This allows admin to remain logged in if they're also logged in
         Auth::guard('web')->logout();
-        $request->session()->invalidate();
+        
+        // Regenerate CSRF token for security (doesn't affect other guards)
         $request->session()->regenerateToken();
 
         return redirect()->route('client.auth');
-
     }
 }

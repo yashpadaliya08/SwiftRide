@@ -1,4 +1,76 @@
---This not complete project i am working on this 
+# SwiftRide - Car Rental Management System
+
+**Note:** This project is currently under development.
+
+## Features
+
+### ✅ Implemented Features
+- User authentication (Client & Admin)
+- Car management (CRUD operations)
+- Booking system with conflict detection
+- Revenue tracking
+- Admin dashboard with statistics
+- Email notifications (Customer & Admin)
+- Booking cancellation with refund tracking
+- Contact/Support system
+
+### 📧 Email Notifications
+The system sends automatic email notifications:
+- **Customer Email**: Sent when a booking is created with all booking details
+- **Admin Email**: Sent to admin with booking details and direct link to confirm booking
+
+**Setup Instructions**: See [EMAIL_SETUP_GUIDE.md](EMAIL_SETUP_GUIDE.md) for free email service setup (Gmail SMTP recommended for students).
+
+---
+
+## Quick Start
+
+1. Install dependencies:
+   ```bash
+   composer install
+   npm install
+   ```
+
+2. Set up environment:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+3. Configure email in `.env` (see EMAIL_SETUP_GUIDE.md):
+   ```env
+   MAIL_MAILER=smtp
+   MAIL_HOST=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_USERNAME=your-email@gmail.com
+   MAIL_PASSWORD=your-app-password
+   MAIL_ENCRYPTION=tls
+   ADMIN_EMAIL=admin@yourdomain.com
+   ```
+
+4. Run migrations:
+   ```bash
+   php artisan migrate
+   ```
+
+5. Start the server:
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+---
+
+## Technology Stack
+- **Backend**: Laravel 12 (PHP 8.2+)
+- **Frontend**: Blade Templates, Tailwind CSS, Alpine.js
+- **Database**: SQLite (configurable)
+- **Email**: SMTP (Gmail/Mailtrap/SendGrid)
+
+---
+
+## Project Status
+This is a work in progress. See EMAIL_SETUP_GUIDE.md for email notification setup.
 
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>

@@ -9,7 +9,10 @@ use App\Models\Car;
 use App\Models\Revenue;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\Facades\DataTables;
+use App\Mail\BookingConfirmationMail;
+use App\Mail\AdminBookingNotificationMail;
 
 class BookingController extends Controller
 {
@@ -133,7 +136,7 @@ class BookingController extends Controller
         $days = $start->diffInDays($end) + 1;
         $total = $days * $car->price_per_day;
 
-        Booking::create([
+        $booking = Booking::create([
             'user_id' => Auth::id(),
             'car_id' => $car->id,
             'pickup_city' => $request->pickup_city,
@@ -146,7 +149,29 @@ class BookingController extends Controller
             'total_price' => $total,
         ]);
 
-        return redirect()->route('booking.myBookings')->with('success', 'Booking confirmed successfully!');
+        // Load relationships for email
+        $booking->load(['car', 'user']);
+
+        // Send email to customer
+        try {
+            Mail::to($request->email)->send(new BookingConfirmationMail($booking));
+        } catch (\Exception $e) {
+            // Log error but don't break the flow
+            \Log::error('Failed to send customer booking email: ' . $e->getMessage());
+        }
+
+        // Send email to admin
+        $adminEmail = config('swiftride.admin_email', 'swiftride15@gmail.com');
+        if ($adminEmail) {
+            try {
+                Mail::to($adminEmail)->send(new AdminBookingNotificationMail($booking));
+            } catch (\Exception $e) {
+                // Log error but don't break the flow
+                \Log::error('Failed to send admin booking email: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->route('booking.myBookings')->with('success', 'Booking confirmed successfully! You will receive a confirmation email shortly.');
     }
 
     public function myBookings()

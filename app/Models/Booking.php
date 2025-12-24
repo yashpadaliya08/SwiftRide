@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Carbon\Carbon;
 
-class booking extends Model
+class Booking extends Model
 {
     use HasFactory;
 
@@ -17,8 +17,11 @@ class booking extends Model
         'dropoff_city',
         'start_datetime',
         'end_datetime',
-        'status' => 'confirmed',
+        'status',
         'total_price',
+        'name',
+        'email',
+        'phone',
     ];
 
 
