@@ -21,7 +21,10 @@ class BookingController extends Controller
 
     public function selectCriteria()
     {
-        return view('client.booking.select_criteria', ['cities' => $this->cities]);
+        return view('client.booking.select_criteria', [
+            'cities' => $this->cities,
+            'bufferHours' => $this->bufferHours
+        ]);
     }
 
     // POST: /booking/search
@@ -91,6 +94,12 @@ class BookingController extends Controller
 
         $start = Carbon::parse("{$request->start_date} {$request->start_time}");
         $end = Carbon::parse("{$request->end_date} {$request->end_time}");
+        
+        // Check for conflicts before confirming
+        if ($this->hasConflict($request->car_id, $start, $end)) {
+            return back()->withErrors(['conflict' => 'Selected car is not available for these dates. Please choose different dates.'])->withInput();
+        }
+
         $car = Car::findOrFail($request->car_id);
         $days = $start->diffInDays($end) + 1;
         $total = $days * $car->price_per_day;
@@ -136,6 +145,7 @@ class BookingController extends Controller
         $days = $start->diffInDays($end) + 1;
         $total = $days * $car->price_per_day;
 
+        // Create booking with PENDING status
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'car_id' => $car->id,
@@ -147,16 +157,52 @@ class BookingController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'total_price' => $total,
+            'status' => 'pending' // pending until payment
         ]);
 
-        // Load relationships for email
+        // Redirect to payment page
+        return redirect()->route('booking.payment', $booking->id);
+    }
+
+    public function showPayment($id)
+    {
+        $booking = Booking::with('car')->where('user_id', Auth::id())->findOrFail($id);
+
+        if ($booking->status !== 'pending') {
+            return redirect()->route('booking.myBookings')->with('info', 'This booking has already been processed.');
+        }
+
+        return view('client.booking.payment', compact('booking'));
+    }
+
+    public function processPayment(Request $request, $id)
+    {
+        $booking = Booking::findOrFail($id);
+        
+        // Security check
+        if ($booking->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // 1. Update status to Confirmed
+        $booking->status = 'confirmed';
+        $booking->save();
+
+        // 2. Record Revenue (Mock Payment)
+        Revenue::create([
+            'booking_id' => $booking->id,
+            'amount' => $booking->total_price,
+            'type' => 'payment',
+            'status' => 'received',
+        ]);
+
+        // 3. Send Emails (Now moved here after payment)
         $booking->load(['car', 'user']);
 
         // Send email to customer
         try {
-            Mail::to($request->email)->send(new BookingConfirmationMail($booking));
+            Mail::to($booking->email)->send(new BookingConfirmationMail($booking));
         } catch (\Exception $e) {
-            // Log error but don't break the flow
             \Log::error('Failed to send customer booking email: ' . $e->getMessage());
         }
 
@@ -166,12 +212,19 @@ class BookingController extends Controller
             try {
                 Mail::to($adminEmail)->send(new AdminBookingNotificationMail($booking));
             } catch (\Exception $e) {
-                // Log error but don't break the flow
                 \Log::error('Failed to send admin booking email: ' . $e->getMessage());
             }
         }
 
-        return redirect()->route('booking.myBookings')->with('success', 'Booking confirmed successfully! You will receive a confirmation email shortly.');
+        // Simulate a slight delay for realism if needed, but not necessary for logic
+        
+        return redirect()->route('booking.success', $booking->id);
+    }
+
+    public function success($id)
+    {
+        $booking = Booking::with('car')->where('user_id', Auth::id())->findOrFail($id);
+        return view('client.booking.success', compact('booking'));
     }
 
     public function myBookings()

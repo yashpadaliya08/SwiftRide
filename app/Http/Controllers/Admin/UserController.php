@@ -11,7 +11,13 @@ class UserController extends Controller
     public function index()
     {
         $users = User::latest()->get();
+        return view('admin.users', compact('users'));
+    }
 
-        return view('admin.registered_users', compact('users'));
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+        return back()->with('success', 'User deleted successfully.');
     }
 }

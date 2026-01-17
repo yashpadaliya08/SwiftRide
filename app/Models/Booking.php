@@ -24,6 +24,11 @@ class Booking extends Model
         'phone',
     ];
 
+    protected $casts = [
+        'start_datetime' => 'datetime',
+        'end_datetime' => 'datetime',
+    ];
+
 
 
     public function user()

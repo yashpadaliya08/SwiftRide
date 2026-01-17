@@ -56,6 +56,9 @@ Route::middleware(['auth:web', \App\Http\Middleware\EnsureClientRole::class, 've
         Route::get('/my-bookings', [ClientBookingController::class, 'myBookings'])->name('myBookings');
         Route::patch('/my-bookings/{booking}/cancel', [ClientBookingController::class, 'cancel'])->name('cancel');
 
+        Route::get('/{booking}/payment', [ClientBookingController::class, 'showPayment'])->name('payment');
+        Route::post('/{booking}/payment', [ClientBookingController::class, 'processPayment'])->name('payment.process');
+        Route::get('/{booking}/success', [ClientBookingController::class, 'success'])->name('success');
 
     });
 
@@ -88,7 +91,9 @@ Route::prefix('admin')
             Route::post('/{id}/confirm', [App\Http\Controllers\Admin\BookingController::class, 'confirmBooking'])->name('confirm');
         });
 
-        Route::get('/users', [AdminDashboardController::class, 'registeredUsers'])->name('users');
+        Route::get('/users', [UserController::class, 'index'])->name('users');
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::get('/calendar', [AdminDashboardController::class, 'calendar'])->name('calendar'); 
         Route::get('/reports', [AdminReportController::class, 'reports'])->name('reports');
         Route::view('/settings', 'admin.settings')->name('settings');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');

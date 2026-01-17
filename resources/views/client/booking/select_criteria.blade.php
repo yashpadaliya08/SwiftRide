@@ -3,106 +3,126 @@
 @section('title', 'Search Available Cars')
 
 @section('content')
-    <div class="container py-5">
-        <h2 class="mb-4 theme-accent">Search Available Cars</h2>
-
-        @if(session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-
-        @if($errors->any())
-            <div class="alert alert-danger" aria-live="polite">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @php
-            $cities = ['Rajkot', 'Ahmedabad', 'Vadodara', 'Surat', 'Jamnagar'];
-            $bufferHours = 8;
-        @endphp
-
-        <form id="bookingForm" action="{{ route('booking.handleSearch') }}" method="POST" novalidate>
-            @csrf
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="pickup_city" class="form-label">Pickup City</label>
-                    <select name="pickup_city" id="pickup_city" class="form-control" required>
-                        <option value="">Select Pickup City</option>
-                        @foreach ($cities as $city)
-                            <option value="{{ $city }}" {{ old('pickup_city') == $city ? 'selected' : '' }}>{{ $city }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="dropoff_city" class="form-label">Dropoff City</label>
-                    <select name="dropoff_city" id="dropoff_city" class="form-control" required>
-                        <option value="">Select Dropoff City</option>
-                        @foreach ($cities as $city)
-                            <option value="{{ $city }}" {{ old('dropoff_city') == $city ? 'selected' : '' }}>{{ $city }}</option>
-                        @endforeach
-                    </select>
-                </div>
+<div class="container py-5">
+    <div class="row align-items-center g-5">
+        
+        <!-- Left Column: Form -->
+        <div class="col-lg-6" data-aos="fade-right">
+             <div class="mb-4">
+                <span class="badge bg-primary text-white rounded-pill px-3 py-2 mb-2 text-uppercase fw-bold small shadow-sm animate__animated animate__fadeInLeft">Step 1 of 3</span>
+                <h1 class="fw-bold display-5 mb-2">Plan your journey</h1>
+                <p class="text-muted lead">Choose where and when you want to go.</p>
             </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="start_date" class="form-label">Start Date</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}" required>
+            @if(session('error'))
+                <div class="alert alert-danger border-0 shadow-sm rounded-3 icon-link">
+                    <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
                 </div>
-                <div class="col-md-6">
-                    <label for="start_time" class="form-label">Start Time</label>
-                    <input type="time" name="start_time" id="start_time" class="form-control" value="{{ old('start_time') }}" required>
+            @endif
+
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    <form id="bookingForm" action="{{ route('booking.handleSearch') }}" method="POST" novalidate>
+                        @csrf
+                        
+                        <!-- Route Selection -->
+                        <div class="position-relative mb-4">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Pick-up Location</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light border-end-0 text-primary"><i class="fas fa-map-marker-alt"></i></span>
+                                    <select name="pickup_city" id="pickup_city" class="form-select bg-light border-start-0 ps-0" required>
+                                        <option value="">Select City</option>
+                                        @foreach ($cities as $city)
+                                            <option value="{{ $city }}" {{ old('pickup_city') == $city ? 'selected' : '' }}>{{ $city }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Drop-off Location</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light border-end-0 text-danger"><i class="fas fa-map-marker-alt"></i></span>
+                                    <select name="dropoff_city" id="dropoff_city" class="form-select bg-light border-start-0 ps-0" required>
+                                        <option value="">Select City</option>
+                                        @foreach ($cities as $city)
+                                            <option value="{{ $city }}" {{ old('dropoff_city') == $city ? 'selected' : '' }}>{{ $city }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date Selection -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Start Date</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="far fa-calendar-alt text-muted"></i></span>
+                                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}" required>
+                                </div>
+                                <input type="hidden" name="start_time" value="10:00">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="far fa-calendar-check text-muted"></i></span>
+                                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ old('end_date') }}" required>
+                                </div>
+                                <input type="hidden" name="end_time" value="10:00">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill fw-bold shadow-sm py-3 hvr-grow">
+                            Find Available Cars <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
+        </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="end_date" class="form-label">End Date</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ old('end_date') }}" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="end_time" class="form-label">End Time</label>
-                    <input type="time" name="end_time" id="end_time" class="form-control" value="{{ old('end_time') }}" required>
+        <!-- Right Column: Hero Image -->
+        <div class="col-lg-6 d-none d-lg-block position-relative" data-aos="fade-left">
+            <div class="position-absolute top-0 end-0 bg-warning rounded-circle blur-bg" style="width: 300px; height: 300px; opacity: 0.1; filter: blur(50px); z-index: -1;"></div>
+            <div class="position-absolute bottom-0 start-0 bg-primary rounded-circle blur-bg" style="width: 200px; height: 200px; opacity: 0.1; filter: blur(40px); z-index: -1;"></div>
+            
+            <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop" 
+                 class="img-fluid rounded-4 shadow-lg rotate-img" 
+                 alt="Driving on a road">
+            
+            <!-- Float Card -->
+            <div class="card position-absolute bottom-0 start-0 m-4 shadow-lg border-0 rounded-4 p-3" style="max-width: 250px;">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success text-white rounded-circle p-2 me-3"><i class="fas fa-check"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-0">Best Rate Guarantee</h6>
+                        <small class="text-muted">We price match locally.</small>
+                    </div>
                 </div>
             </div>
-
-            <button type="submit" class="btn btn-theme">Find Cars</button>
-        </form>
+        </div>
     </div>
+</div>
 @endsection
 
 @section('styles')
     <style>
-        form .form-control {
-            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        .hvr-grow { transition: transform 0.2s; }
+        .hvr-grow:hover { transform: scale(1.02); }
+        .rotate-img { transform: rotate(2deg); transition: transform 0.5s ease; }
+        .rotate-img:hover { transform: rotate(0deg); }
+        
+        .form-select, .form-control {
+            border-color: #dee2e6;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
         }
-        form .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 8px rgba(0,123,255,0.5);
-            outline: none;
+        .form-select:focus, .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
         }
-        .btn-theme {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .btn-theme:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
-        }
-        .text-danger {
-            opacity: 0;
-            animation: fadeIn 0.3s forwards;
-            margin-top: 0.25rem;
-            font-size: 0.9rem;
-        }
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
+        .input-group-text { font-size: 1.1rem; }
     </style>
 @endsection
 
@@ -121,103 +141,17 @@
                 return date.toISOString().split('T')[0];
             }
 
-            function formatTime(date) {
-                return date.toTimeString().slice(0, 5);
-            }
-
             $('#start_date').attr('min', formatDate(minDateTime));
 
-            function updateStartTimeMin() {
-                const startDateVal = $('#start_date').val();
-                const todayStr = formatDate(minDateTime);
-                if (startDateVal === todayStr) {
-                    $('#start_time').attr('min', formatTime(minDateTime));
-                } else {
-                    $('#start_time').removeAttr('min');
-                }
-            }
-            updateStartTimeMin();
-
             $('#start_date').on('change', function () {
-                updateStartTimeMin();
-
                 const startDate = $(this).val();
                 if (startDate) {
                     $('#end_date').attr('min', startDate);
-
                     if ($('#end_date').val() && $('#end_date').val() < startDate) {
                         $('#end_date').val('');
-                        $('#end_time').val('');
                     }
-                } else {
-                    $('#end_date').removeAttr('min');
                 }
-                updateEndTimeMin();
             });
-
-            $('#start_time').on('change', function () {
-                const startDate = $('#start_date').val();
-                if (startDate) {
-                    $('#end_date').attr('min', startDate);
-                }
-                updateEndTimeMin();
-            });
-
-            function updateEndTimeMin() {
-                const startDate = $('#start_date').val();
-                const startTime = $('#start_time').val();
-                const endDate = $('#end_date').val();
-
-                if (!startDate || !startTime || !endDate) {
-                    $('#end_time').removeAttr('min');
-                    return;
-                }
-
-                if (endDate === startDate) {
-                    const startDateTime = new Date(`${startDate}T${startTime}`);
-                    const minEndTimeDate = new Date(startDateTime.getTime() + 60000);
-                    $('#end_time').attr('min', formatTime(minEndTimeDate));
-
-                    const currentEndTime = $('#end_time').val();
-                    if (currentEndTime && currentEndTime < formatTime(minEndTimeDate)) {
-                        $('#end_time').val('');
-                    }
-                } else {
-                    $('#end_time').removeAttr('min');
-                }
-            }
-
-            $('#end_date').on('change', updateEndTimeMin);
-
-            // Custom validation rules
-            $.validator.addMethod("startAfterBuffer", function (value, element) {
-                const startDate = $('#start_date').val();
-                const startTime = $('#start_time').val();
-                if (!startDate || !startTime) return true;
-                const startDateTime = new Date(`${startDate}T${startTime}`);
-                const nowBuffer = new Date(new Date().getTime() + bufferHours * 60 * 60 * 1000);
-                return startDateTime >= nowBuffer;
-            }, `Start date & time must be at least ${bufferHours} hour(s) from now`);
-
-            $.validator.addMethod("endAfterStart", function (value, element) {
-                const startDate = $('#start_date').val();
-                const startTime = $('#start_time').val();
-                const endDate = $('#end_date').val();
-                const endTime = $('#end_time').val();
-                if (!startDate || !startTime || !endDate || !endTime) return true;
-                const startDateTime = new Date(`${startDate}T${startTime}`);
-                const endDateTime = new Date(`${endDate}T${endTime}`);
-                return endDateTime > startDateTime;
-            }, "End date & time must be after start date & time");
-
-            $.validator.addMethod("endAfterBuffer", function (value, element) {
-                const endDate = $('#end_date').val();
-                const endTime = $('#end_time').val();
-                if (!endDate || !endTime) return true;
-                const endDateTime = new Date(`${endDate}T${endTime}`);
-                const nowBuffer = new Date(new Date().getTime() + bufferHours * 60 * 60 * 1000);
-                return endDateTime >= nowBuffer;
-            }, `End date & time must be at least ${bufferHours} hour(s) from now`);
 
             $("#bookingForm").validate({
                 rules: {
@@ -226,19 +160,10 @@
                     start_date: {
                         required: true,
                         dateISO: true,
-                        startAfterBuffer: true,
-                    },
-                    start_time: {
-                        required: true,
                     },
                     end_date: {
                         required: true,
                         dateISO: true,
-                        endAfterStart: true,
-                        endAfterBuffer: true,
-                    },
-                    end_time: {
-                        required: true,
                     },
                 },
                 messages: {
@@ -246,22 +171,14 @@
                     dropoff_city: "Please select a dropoff city",
                     start_date: {
                         required: "Please select a start date",
-                        dateISO: "Please enter a valid date",
-                    },
-                    start_time: {
-                        required: "Please select a start time",
                     },
                     end_date: {
                         required: "Please select an end date",
-                        dateISO: "Please enter a valid date",
-                    },
-                    end_time: {
-                        required: "Please select an end time",
                     },
                 },
                 errorClass: "text-danger",
                 errorPlacement: function(error, element) {
-                    error.insertAfter(element);
+                    error.insertAfter(element.closest('.input-group'));
                 },
                 highlight: function(element) {
                     $(element).addClass('is-invalid');

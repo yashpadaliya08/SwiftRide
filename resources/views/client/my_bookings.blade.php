@@ -1,207 +1,149 @@
 @extends('client.layout')
 
-@section('title', 'My Bookings')
+@section('title', 'My Trips - SwiftRide')
 
 @section('content')
-    <div class="container py-5">
-        <h2 class="mb-4 text-theme fw-bold text-center">My Bookings</h2>
-
-        @if($bookings->isEmpty())
-            <div class="alert alert-info text-center shadow-sm rounded">
-                You have no bookings yet. Book a car to see it here.
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5" data-aos="fade-down">
+        <div>
+            <h5 class="text-primary fw-bold mb-2">My Activity</h5>
+            <h1 class="display-5 fw-black text-dark mb-0">Your Journey History</h1>
+        </div>
+        <div class="mt-3 mt-md-0 d-flex gap-3">
+            <a href="{{ route('booking.selectCriteria') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="fas fa-plus me-2"></i>New Adventure
+            </a>
+            <div class="dropdown">
+                <button class="btn btn-outline-dark rounded-pill dropdown-toggle px-4" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-filter me-2"></i>Filter
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2">
+                    <li><a class="dropdown-item rounded-3 mb-1" href="#all" data-bs-toggle="tab">All Bookings</a></li>
+                    <li><a class="dropdown-item rounded-3 mb-1" href="#upcoming" data-bs-toggle="tab">Upcoming Trips</a></li>
+                    <li><a class="dropdown-item rounded-3" href="#completed" data-bs-toggle="tab">Past Trips</a></li>
+                </ul>
             </div>
-        @else
-            <div class="card shadow-lg rounded-4 border-0">
-                <div class="card-body p-4">
-                    <div class="table-responsive">
-                        <table id="bookings-table" class="table table-striped table-hover align-middle text-center">
-                            <thead class="table-theme text-white rounded-top">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>User</th>
-                                    <th>Car</th>
-                                    <th>From</th>
-                                    <th>To</th>
-                                    <th>Total Price</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($bookings as $booking)
-                                    <tr>
-                                        <td>{{ $booking->id }}</td>
-                                        <td>{{ $booking->name }}</td>
-                                        <td>{{ $booking->car->brand ?? 'N/A' }} {{ $booking->car->model ?? '' }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($booking->start_datetime)->format('d M, Y h:i A') }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($booking->end_datetime)->format('d M, Y h:i A') }}</td>
-                                        <td>₹{{ number_format($booking->total_price ?? 0, 2) }}</td>
-                                        <td>
-                                            @if($booking->status === 'confirmed')
-                                                <span class="badge bg-info">Confirmed</span>
-                                            @elseif($booking->status === 'pending')
-                                                <span class="badge bg-warning text-dark">Pending</span>
-                                            @elseif($booking->status === 'cancelled')
-                                                <span class="badge bg-danger">Cancelled</span>
-                                            @elseif($booking->status === 'completed')
-                                                <span class="badge bg-success">Completed</span>
-                                            @else
-                                                <span class="badge bg-secondary">Unknown</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if($booking->status == 'pending')
-                                                <button type="button" class="btn btn-sm btn-outline-danger cancel-btn"
-                                                    data-bs-toggle="modal" data-bs-target="#cancelModal"
-                                                    data-booking-id="{{ $booking->id }}">
-                                                    Cancel
-                                                </button>
-                                            @else
-                                                <span class="text-muted">—</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <div class="mt-3">
-                            {{ $bookings->links() }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-    </div>
-
-    <!-- Cancel Modal -->
-    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" id="cancelForm">
-                @csrf
-                @method('PATCH')
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="cancelModalLabel">Confirm Cancellation</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to cancel this booking?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep it</button>
-                        <button type="submit" class="btn btn-danger">Yes, Cancel</button>
-                    </div>
-                </div>
-            </form>
         </div>
     </div>
 
+    @if($bookings->isEmpty())
+        <div class="text-center py-5" data-aos="zoom-in">
+            <div class="mb-4 text-primary opacity-25">
+                <i class="fas fa-calendar-times fa-5x"></i>
+            </div>
+            <h2 class="fw-black text-dark">No trips found.</h2>
+            <p class="text-muted lead mb-5">Your travel diary is empty! Let's start by planning your first ride.</p>
+            <a href="{{ route('booking.selectCriteria') }}" class="btn btn-dark btn-lg rounded-pill px-5 fw-bold shadow-lg">Find a Car Now</a>
+        </div>
+    @else
+        <!-- Tabs Navigation -->
+        <div class="mb-4" data-aos="fade-up">
+            <ul class="nav nav-pills gap-2 bg-light p-2 rounded-pill d-inline-flex" id="bookingTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill px-4 fw-bold" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">All</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-4 fw-bold" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab">Upcoming</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-4 fw-bold" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">Past Trips</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content border-0" id="bookingTabContent">
+            <!-- ALL TAB -->
+            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                @include('client.partials.booking-list', ['filtered_bookings' => $bookings])
+            </div>
+            
+            <!-- UPCOMING TAB -->
+            <div class="tab-pane fade" id="upcoming" role="tabpanel">
+                @php $upcoming = $bookings->whereIn('status', ['confirmed', 'pending'])->filter(fn($b) => $b->end_datetime >= now()); @endphp
+                @if($upcoming->count() > 0)
+                    @include('client.partials.booking-list', ['filtered_bookings' => $upcoming])
+                @else
+                    <div class="text-center py-5 text-muted">No upcoming adventures found. <a href="{{ route('booking.selectCriteria') }}" class="text-primary fw-bold text-decoration-none">Book one?</a></div>
+                @endif
+            </div>
+
+            <!-- COMPLETED TAB -->
+            <div class="tab-pane fade" id="completed" role="tabpanel">
+                @php $history = $bookings->where('status', 'completed')->merge($bookings->where('status', 'cancelled')); @endphp
+                @if($history->count() > 0)
+                    @include('client.partials.booking-list', ['filtered_bookings' => $history])
+                @else
+                    <div class="text-center py-5 text-muted">Your trip history will appear here once you complete your travels.</div>
+                @endif
+            </div>
+        </div>
+        
+        <div class="mt-5 d-flex justify-content-center">
+            {{ $bookings->links() }}
+        </div>
+    @endif
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" id="cancelForm">
+            @csrf
+            @method('PATCH')
+            <div class="modal-content border-0 shadow-lg rounded-5 overflow-hidden">
+                <div class="modal-header border-0 bg-danger text-white p-4">
+                    <h5 class="modal-title fw-black"><i class="fas fa-exclamation-triangle me-2"></i>Cancel Trip?</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-5 text-center">
+                    <div class="mb-4 text-danger opacity-25">
+                        <i class="fas fa-ban fa-5x"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Are you sure?</h4>
+                    <p class="text-muted mb-0">Cancelling your trip may incur fees depending on the time of cancellation. This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center pb-5 gap-3">
+                    <button type="button" class="btn btn-light rounded-pill px-5 fw-bold" data-bs-dismiss="modal">Keep Trip</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-5 fw-bold shadow-sm">Yes, Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .nav-pills .nav-link {
+        color: #6c757d;
+        background: none;
+    }
+    .nav-pills .nav-link.active {
+        color: #fff !important;
+        background: #d12e2e !important;
+        box-shadow: 0 4px 15px rgba(209, 46, 46, 0.2);
+    }
+    .dropdown-item:active {
+        background-color: #d12e2e;
+    }
+</style>
 @endsection
 
 @section('scripts')
-    <!-- Include DataTables via CDN if not already included -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-            $('#bookings-table').DataTable({
-                "paging": true,
-                "lengthChange": false,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-                "language": {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search bookings..."
-                },
-                "columnDefs": [
-                    { targets: [0], className: "fw-bold" }, // ID bold
-                    { targets: '_all', className: "align-middle" }
-                ]
-            });
-
-            $('.cancel-btn').on('click', function () {
-                let bookingId = $(this).data('booking-id');
-                let cancelUrl = `{{ url('booking/my-bookings') }}/${bookingId}/cancel`;
-                $('#cancelForm').attr('action', cancelUrl);
-            });
+<script>
+    $(document).ready(function () {
+        // Handle cancellation modal
+        $('.cancel-btn').on('click', function () {
+            let bookingId = $(this).data('booking-id');
+            let cancelUrl = `{{ url('booking/my-bookings') }}/${bookingId}/cancel`;
+            $('#cancelForm').attr('action', cancelUrl);
         });
 
-    </script>
+        // Optional: Smoothly switch tabs via URL hash or dropdown
+        $('a[data-bs-toggle="tab"]').on('click', function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+    });
+</script>
 @endsection
-
-<style>
-    .text-theme {
-        color: #e74c3c;
-    }
-
-    .table-theme {
-        background-color: #e74c3c;
-    }
-
-    #bookings-table thead th {
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-        vertical-align: middle;
-    }
-
-    #bookings-table td,
-    #bookings-table th {
-        padding: 1rem;
-        vertical-align: middle;
-    }
-
-    #bookings-table tbody tr:hover {
-        background-color: #fef2f2;
-        cursor: pointer;
-    }
-
-    .dataTables_filter {
-        float: right !important;
-        margin-bottom: 1rem;
-    }
-
-    .dataTables_filter input {
-        border-radius: 0.5rem;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-    }
-
-    .dataTables_paginate {
-        float: right;
-    }
-
-    .paginate_button {
-        margin: 0 4px !important;
-        border-radius: 0.3rem !important;
-    }
-
-    .dataTables_info {
-        font-size: 0.9rem;
-        margin-top: 1rem;
-    }
-
-    thead tr th:first-child {
-        border-top-left-radius: 0.5rem;
-    }
-
-    thead tr th:last-child {
-        border-top-right-radius: 0.5rem;
-    }
-
-    @media (max-width: 576px) {
-        .table-responsive {
-            font-size: 0.9rem;
-        }
-
-        .dataTables_filter {
-            float: none !important;
-            text-align: left;
-        }
-    }
-</style>

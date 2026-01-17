@@ -1,30 +1,112 @@
 @extends('client.layout')
 
-@section('title', 'Home')
+@section('title', 'Your Premium Journey Starts Here')
 
 @section('content')
+<!-- 🚀 Hero Section -->
+<section class="hero-section position-relative overflow-hidden vh-100 d-flex align-items-center" style="margin-top: -85px; z-index: 1;">
+    <!-- Background Image with Overlay -->
+    <div class="position-absolute inset-0 w-100 h-100" style="background: url('{{ asset('hero_car_luxury_1768655390063.png') }}') center/cover no-repeat;">
+        <div class="position-absolute inset-0 w-100 h-100 bg-dark opacity-40"></div>
+        <div class="position-absolute inset-0 w-100 h-100 bg-gradient-to-t from-dark to-transparent opacity-80"></div>
+    </div>
 
-<!-- 🚀 Hero Banner -->
-<section class="text-center py-5 bg-white w-100">
-    <div class="container px-3 px-md-5">
-        <h1 id="typing-text" class="display-4 fw-bold text-danger mb-3" aria-live="polite" aria-atomic="true"></h1>
-        <p class="lead mt-3 text-secondary">Find the perfect car for your journey — anytime, anywhere.</p>
-        <a href="{{ route('booking.selectCriteria') }}" class="btn btn-theme btn-lg mt-4 shadow-sm" role="button" aria-label="Browse Available Cars">Browse Available Cars</a>
+    <div class="container position-relative text-center text-white" data-aos="zoom-in" data-aos-duration="1200">
+        <span class="badge bg-primary bg-opacity-25 text-white rounded-pill px-4 py-2 border border-white border-opacity-25 mb-4 text-uppercase fw-bold small tracking-widest">Premium Car Rental</span>
+        <h1 class="display-1 fw-black mb-4">Drive the <span class="text-primary">Extraordinary</span></h1>
+        <p class="lead mb-5 opacity-75 mx-auto" style="max-width: 700px;">Experience ultimate luxury and freedom with SwiftRide. From high-performance sports cars to spacious SUVs, find the perfect companion for your next journey.</p>
+        
+        <!-- Quick Search Box -->
+        <div class="card border-0 shadow-lg rounded-5 bg-white p-3 mx-auto search-glass-card" style="max-width: 900px;" data-aos="fade-up" data-aos-delay="400">
+            <form action="{{ route('booking.selectCriteria') }}" method="GET" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group bg-light rounded-pill px-3 py-1">
+                        <span class="input-group-text bg-transparent border-0 text-primary"><i class="fas fa-map-marker-alt"></i></span>
+                        <input type="text" class="form-control bg-transparent border-0 small" placeholder="Where to pick up?">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group bg-light rounded-pill px-3 py-1">
+                        <span class="input-group-text bg-transparent border-0 text-primary"><i class="far fa-calendar"></i></span>
+                        <input type="text" class="form-control bg-transparent border-0 small" placeholder="Pick-up date" onfocus="(this.type='date')">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group bg-light rounded-pill px-3 py-1">
+                        <span class="input-group-text bg-transparent border-0 text-primary"><i class="far fa-clock"></i></span>
+                        <input type="text" class="form-control bg-transparent border-0 small" placeholder="Drop-off date" onfocus="(this.type='date')">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary rounded-pill w-100 py-3 fw-bold shadow-sm">
+                        Search <i class="fas fa-search ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </section>
 
-<!-- 🚘 Our Cars -->
-<section class="py-5 text-center bg-white w-100">
-    <div class="container px-3 px-md-5">
-        <h2 class="mb-4 fw-semibold text-dark">Our Popular Cars</h2>
-        <div class="row g-4 justify-content-center">
+<!-- 🚘 Featured Fleet -->
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-end mb-5" data-aos="fade-right">
+            <div>
+                <h5 class="text-primary fw-bold mb-2">Our Fleet</h5>
+                <h2 class="display-5 fw-black text-dark">Selected for Excellence</h2>
+            </div>
+            <a href="{{ route('browse') }}" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold">Explore All <i class="fas fa-arrow-right ms-2"></i></a>
+        </div>
+        
+        <div class="row g-4">
             @foreach($cars as $car)
-            <div class="col-md-3" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                <div class="card h-100 shadow-sm border-0 hover-shadow">
-                    <img src="{{ asset('storage/' . $car->image) }}" class="card-img-top" alt="{{ $car->name ?? 'Car image' }}">
-                    <div class="card-body">
-                        <h5 class="card-title text-truncate" title="{{ $car->name }}">{{ $car->name }}</h5>
-                        <p class="fw-semibold theme-accent">₹{{ number_format($car->price_per_day) }}/day</p>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden car-card hover-lift">
+                    <!-- Image -->
+                    <div class="position-relative">
+                        <img src="{{ $car->image ? asset('storage/' . $car->image) : 'https://via.placeholder.com/400x250?text=No+Image' }}" 
+                             class="card-img-top object-fit-cover" 
+                             style="height: 200px;" 
+                             alt="{{ $car->brand }} {{ $car->model }}">
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-white text-dark shadow-sm rounded-pill fw-bold">₹{{ number_format($car->price_per_day) }}/day</span>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark mb-1">{{ $car->brand }} {{ $car->model }}</h6>
+                            <p class="text-muted small mb-0">{{ $car->type }} • {{ $car->year }}</p>
+                        </div>
+                        
+                        <!-- Specs -->
+                        <div class="row g-2 mb-4">
+                            <div class="col-4">
+                                <div class="p-2 border rounded-3 text-center bg-light">
+                                    <i class="fas fa-gas-pump text-muted mb-1 d-block" style="font-size: 0.7rem;"></i>
+                                    <small class="fw-bold x-small">{{ $car->fuel_type ?? 'Petrol' }}</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded-3 text-center bg-light">
+                                    <i class="fas fa-cog text-muted mb-1 d-block" style="font-size: 0.7rem;"></i>
+                                    <small class="fw-bold x-small">{{ $car->transmission ?? 'Auto' }}</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded-3 text-center bg-light">
+                                    <i class="fas fa-user-friends text-muted mb-1 d-block" style="font-size: 0.7rem;"></i>
+                                    <small class="fw-bold x-small">{{ $car->seats ?? 5 }} Seats</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto">
+                            <a href="{{ route('car.details', $car->id) }}" class="btn btn-dark w-100 rounded-pill fw-bold py-2 shadow-sm">
+                                View Details
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -33,63 +115,28 @@
     </div>
 </section>
 
-<!-- 🚗 How It Works -->
-<section class="py-5 bg-light text-center w-100">
-    <div class="container px-3 px-md-5">
-        <h2 class="mb-4 fw-semibold text-dark">How It Works</h2>
-        <div class="row g-4">
-            @foreach([
-                ['title' => '1. Choose Your Car', 'desc' => 'Select from a wide range of cars for any occasion.', 'delay' => 0],
-                ['title' => '2. Book Instantly', 'desc' => 'Pick a date, confirm your booking — done in minutes.', 'delay' => 100],
-                ['title' => '3. Drive & Enjoy', 'desc' => 'Pick up your car and hit the road hassle-free.', 'delay' => 200],
-            ] as $step)
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ $step['delay'] }}">
-                <div class="p-4 shadow-sm bg-white rounded h-100 hover-shadow">
-                    <h4 class="theme-accent">{{ $step['title'] }}</h4>
-                    <p>{{ $step['desc'] }}</p>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-<!-- 🏆 Why Choose SwiftRide -->
-<section class="py-5 text-center w-100 bg-white">
-    <div class="container px-3 px-md-5">
-        <h2 class="mb-4 fw-semibold text-dark">Why Choose SwiftRide?</h2>
-        <div class="row g-4">
-            @foreach([
-                ['title' => 'Affordable Rates', 'desc' => 'Transparent pricing with no hidden fees.', 'delay' => 0],
-                ['title' => '24/7 Support', 'desc' => "We're always here to assist you anytime.", 'delay' => 100],
-                ['title' => 'Easy Pickup', 'desc' => 'Multiple locations for convenient access.', 'delay' => 200],
-                ['title' => 'Quality Vehicles', 'desc' => 'Clean, well-maintained, and reliable cars.', 'delay' => 300],
-            ] as $feature)
-            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="{{ $feature['delay'] }}">
-                <div class="p-3 border rounded h-100 bg-light hover-shadow">
-                    <h5 class="theme-accent">{{ $feature['title'] }}</h5>
-                    <p>{{ $feature['desc'] }}</p>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
 <!-- 🧍 Testimonials -->
-<section class="py-5 bg-light w-100">
-    <div class="container px-3 px-md-5 text-center">
-        <h2 class="mb-5">What Our Customers Say</h2>
+<section class="py-5 bg-light overflow-hidden">
+    <div class="container py-5 text-center">
+        <h5 class="text-primary fw-bold mb-2" data-aos="fade-up">Trusted by Thousands</h5>
+        <h2 class="display-5 fw-black text-dark mb-5" data-aos="fade-up" data-aos-delay="100">Customer Success Stories</h2>
+        
         <div class="row g-4">
             @foreach([
-                ['text' => 'Easy booking and amazing car condition. Loved it!', 'name' => 'Priya Patel', 'animation' => 'fade-right'],
-                ['text' => 'Great rates, quick support, and smooth pickup!', 'name' => 'Rahul Desai', 'animation' => 'fade-up'],
-                ['text' => 'Definitely my go-to car rental app from now on.', 'name' => 'Meera Joshi', 'animation' => 'fade-left'],
+                ['text' => 'The best car rental experience I\'ve ever had. The Porsche 911 was in pristine condition!', 'name' => 'Alex Thompson', 'role' => 'Business Traveler'],
+                ['text' => 'Exceptional service and extremely easy booking process. Highly recommended!', 'name' => 'Sarah Johnson', 'role' => 'Driving Enthusiast'],
+                ['text' => 'SwiftRide made our family trip unforgettable. The SUV was spacious and very comfortable.', 'name' => 'Michael Chen', 'role' => 'Family Man'],
             ] as $testimonial)
-            <div class="col-md-4" data-aos="{{ $testimonial['animation'] }}">
-                <div class="p-4 bg-white rounded shadow-sm hover-shadow">
-                    <p class="fst-italic">“{{ $testimonial['text'] }}”</p>
-                    <h6 class="mt-3 mb-0">- {{ $testimonial['name'] }}</h6>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 200 }}">
+                <div class="card border-0 shadow-sm rounded-4 p-5 h-100 bg-white hover-lift">
+                    <div class="mb-4 text-primary opacity-25">
+                        <i class="fas fa-quote-left fa-3x"></i>
+                    </div>
+                    <p class="mb-4 fst-italic text-dark">{{ $testimonial['text'] }}</p>
+                    <div class="mt-auto">
+                        <h6 class="fw-bold mb-0 text-dark">{{ $testimonial['name'] }}</h6>
+                        <small class="text-muted">{{ $testimonial['role'] }}</small>
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -97,76 +144,54 @@
     </div>
 </section>
 
-<!-- 📞 CTA -->
-<section class="py-5 text-center theme-accent-bg w-100">
-    <div class="container px-3 px-md-5">
-        <h2 class="fw-bold">Ready to ride?</h2>
-        <p class="lead">Find your perfect car now and enjoy your journey.</p>
-        <a href="{{ url('/browse') }}" class="btn btn-light btn-lg mt-3 shadow-sm" role="button" aria-label="Start Browsing">Start Browsing</a>
+<!-- 📞 Final CTA -->
+<section class="py-5">
+    <div class="container py-5">
+        <div class="card border-0 bg-dark rounded-5 overflow-hidden shadow-lg" data-aos="zoom-in-up">
+            <div class="row g-0 align-items-center">
+                <div class="col-lg-7 p-5 p-md-5">
+                    <h2 class="display-4 fw-black text-white mb-3">Ready to experience the best?</h2>
+                    <p class="lead text-white opacity-75 mb-5">Join thousands of happy customers and start your premium journey today.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{{ route('booking.selectCriteria') }}" class="btn btn-primary rounded-pill px-5 py-3 fw-bold">Book a Ride Now</a>
+                        <a href="{{ route('browse') }}" class="btn btn-outline-white border-2 rounded-pill px-5 py-3 fw-bold text-white">Browse Cars</a>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block">
+                    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2070&auto=format&fit=crop" class="img-fluid" style="object-fit: cover; height: 100%;" alt="CTA Car">
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<!-- 💬 WhatsApp Button -->
-<a href="https://wa.me/91XXXXXXXXXX" class="btn btn-success position-fixed bottom-0 end-0 m-4 shadow rounded-circle" style="z-index:999;" aria-label="Chat on WhatsApp">
-    <i class="bi bi-whatsapp fs-4"></i>
-</a>
-
-<!-- 🔤 Typing Animation -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const text = "SwiftRide - Rent Smarter, Drive Faster";
-        const typingTarget = document.getElementById("typing-text");
-        let index = 0, isDeleting = false, speed = 100;
-
-        function typeLoop() {
-            if (!isDeleting) {
-                typingTarget.textContent = text.substring(0, index + 1);
-                index++;
-                if (index === text.length) {
-                    isDeleting = true;
-                    setTimeout(typeLoop, 2000);
-                    return;
-                }
-            } else {
-                typingTarget.textContent = text.substring(0, index - 1);
-                index--;
-                if (index === 0) {
-                    isDeleting = false;
-                    setTimeout(typeLoop, 800);
-                    return;
-                }
-            }
-            setTimeout(typeLoop, speed);
-        }
-
-        typeLoop();
-    });
-</script>
-
-<!-- 🌟 AOS (Animate On Scroll) -->
+<!-- AOS Animation -->
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-<script>AOS.init();</script>
+<script>
+    AOS.init({ duration: 1000, once: true });
+</script>
 
-<!-- 🎨 Custom Theme Styling -->
 <style>
-    .theme-accent { color: #e74c3c !important; }
-    .theme-accent-bg { background-color: #e74c3c !important; color: #fff; }
-    .btn-theme { background-color: #e74c3c; color: #fff; border: none; transition: background-color 0.3s ease; }
-    .btn-theme:hover, .btn-theme:focus {
-        background-color: #c0392b;
-        color: #fff;
-        outline: none;
-        box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.5);
+    .x-small { font-size: 0.65rem; }
+    .vh-100 { min-height: 100vh; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    
+    .bg-gradient-to-t {
+        background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
     }
-    .hover-shadow {
-        transition: all 0.4s ease-in-out;
-        cursor: pointer;
+    
+    .search-glass-card {
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(20px);
     }
-    .hover-shadow:hover {
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-        transform: scale(1.03);
+    
+    .btn-outline-white {
+        border-color: rgba(255,255,255,0.2);
+    }
+    .btn-outline-white:hover {
+        background: white;
+        color: black !important;
     }
 </style>
-
 @endsection

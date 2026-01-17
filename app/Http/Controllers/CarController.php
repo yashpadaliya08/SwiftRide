@@ -38,6 +38,11 @@ class CarController extends Controller
             'price_per_day' => 'required|numeric',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'type' => 'nullable|string|max:50',
+            'status' => 'required|in:available,unavailable',
+            'transmission' => 'required|in:manual,automatic',
+            'fuel_type' => 'required|in:petrol,diesel,electric,hybrid',
+            'seats' => 'required|integer|min:1|max:50',
         ]);
 
         // Handle image upload
@@ -55,6 +60,11 @@ class CarController extends Controller
             'price_per_day' => $request->price_per_day,
             'description' => $request->description,
             'image' => $imagePath,
+            'type' => $request->type,
+            'status' => $request->status,
+            'transmission' => $request->transmission,
+            'fuel_type' => $request->fuel_type,
+            'seats' => $request->seats,
         ]);
 
         return redirect()->route('admin.cars.index')->with('success', 'Car added successfully!');

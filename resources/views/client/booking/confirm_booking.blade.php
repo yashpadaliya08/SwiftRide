@@ -1,141 +1,173 @@
 @extends('client.layout')
 
-@section('title', 'Confirm Your Booking')
+@section('title', 'Confirm Your Trip')
 
 @section('content')
-    <div class="container my-5">
-        <div class="row g-4 align-items-start">
-            <!-- Left: Booking Summary -->
-            <div class="col-md-6" data-aos="fade-right">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">🚗 Booking Summary</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled">
-                            <li><strong>Car:</strong> {{ $car->brand }} {{ $car->model }} ({{ $car->year }})</li>
-                            <li><strong>Pickup City:</strong> {{ $pickup_city }}</li>
-                            <li><strong>Dropoff City:</strong> {{ $dropoff_city }}</li>
-                            <li><strong>Pickup:</strong> {{ $start->format('d M Y, h:i A') }}</li>
-                            <li><strong>Return:</strong> {{ $end->format('d M Y, h:i A') }}</li>
-                            <li><strong>Duration:</strong> {{ $start->diffInDays($end) + 1 }} day(s)</li>
-                            <li><strong>Rate:</strong> ₹{{ number_format($car->price_per_day, 2) }}/day</li>
-                        </ul>
-                        <div class="mt-3 border-top pt-3">
-                            <h4 class="text-success">Total: ₹{{ number_format($total, 2) }}</h4>
-                        </div>
-                    </div>
+<div class="container py-5">
+    <!-- Stepper -->
+    <div class="row justify-content-center mb-5" data-aos="fade-down">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between position-relative">
+                <div class="text-center position-relative" style="z-index: 2;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow" style="width: 40px; height: 40px;"><i class="fas fa-check"></i></div>
+                    <small class="fw-bold text-muted">Select</small>
                 </div>
-            </div>
-
-            <!-- Right: Booking Form -->
-            <div class="col-md-6" data-aos="fade-left">
-                <div class="card shadow border-0 h-100">
-                    <div class="card-body">
-                        <h5 class="mb-4">👤 Your Details</h5>
-                        @if(session('error'))
-                            <div class="alert alert-danger">{{ session('error') }}</div>
-                        @endif
-
-                        <form id="bookingForm" method="POST" action="{{ route('booking.store') }}">
-                            @csrf
-
-                            <!-- Hidden Fields -->
-                            <input type="hidden" name="car_id" value="{{ $car->id }}">
-                            <input type="hidden" name="pickup_city" value="{{ $pickup_city }}">
-                            <input type="hidden" name="dropoff_city" value="{{ $dropoff_city }}">
-                            <input type="hidden" name="start_date" value="{{ $start_date }}">
-                            <input type="hidden" name="start_time" value="{{ $start_time }}">
-                            <input type="hidden" name="end_date" value="{{ $end_date }}">
-                            <input type="hidden" name="end_time" value="{{ $end_time }}">
-
-                            <!-- Name -->
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" id="name" name="name"
-                                       class="form-control @error('name') is-invalid @enderror"
-                                       value="{{ old('name', auth()->user()->name ?? '') }}" required>
-                                @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <!-- Email -->
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email Address</label>
-                                <input type="email" id="email" name="email"
-                                       class="form-control @error('email') is-invalid @enderror"
-                                       value="{{ old('email', auth()->user()->email ?? '') }}" required>
-                                @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <!-- Phone -->
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="text" id="phone" name="phone"
-                                       class="form-control @error('phone') is-invalid @enderror"
-                                       value="{{ old('phone', auth()->user()->phone ?? '') }}" required>
-                                @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="{{ route('booking.selectCriteria') }}" class="btn btn-outline-secondary">← Back</a>
-                                <button type="submit" class="btn btn-primary">Confirm Booking</button>
-                            </div>
-                        </form>
-                    </div>
+                <div class="text-center position-relative" style="z-index: 2;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow" style="width: 40px; height: 40px;">2</div>
+                    <small class="fw-bold">Confirm</small>
+                </div>
+                <div class="text-center position-relative" style="z-index: 2;">
+                    <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 40px; height: 40px;">3</div>
+                    <small class="fw-bold text-muted">Pay</small>
+                </div>
+                <!-- Progress Line -->
+                <div class="position-absolute top-0 start-0 w-100 mt-3" style="height: 2px; background: #e9ecef; z-index: 1;">
+                    <div class="bg-primary h-100" style="width: 50%;"></div>
                 </div>
             </div>
         </div>
     </div>
-@endsection
 
-@section('styles')
-    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-    <style>
-        .card-header {
-            font-weight: bold;
-        }
+    <div class="row g-5">
+        <!-- Left: Summary -->
+        <div class="col-lg-5" data-aos="fade-right">
+            <h4 class="fw-bold mb-4">Trip Summary</h4>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-body p-4">
+                    <!-- Car Preview -->
+                    <div class="d-flex align-items-center mb-4 pb-4 border-bottom">
+                         @if($car->image)
+                            <img src="{{ asset('storage/' . $car->image) }}" class="rounded-3 me-3" style="width: 100px; height: 70px; object-fit: cover;">
+                        @endif
+                        <div>
+                            <h5 class="fw-bold mb-0">{{ $car->brand }} {{ $car->model }}</h5>
+                            <small class="text-muted">{{ $car->type }} • {{ $car->year }}</small>
+                        </div>
+                    </div>
 
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-        }
+                    <!-- Itinerary Timeline -->
+                    <div class="position-relative ps-4 mb-4">
+                        <div class="position-absolute start-0 top-0 h-100 border-start border-2 border-primary opacity-25" style="left: 7px !important;"></div>
+                        
+                        <div class="mb-4 position-relative">
+                            <div class="position-absolute rounded-circle bg-primary" style="width: 14px; height: 14px; left: -31px; top: 4px;"></div>
+                            <div class="small fw-bold text-muted text-uppercase mb-1">Pick-up</div>
+                            <div class="fw-bold">{{ $pickup_city }}</div>
+                            <div class="small">{{ $start->format('d M Y') }}</div>
+                        </div>
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
+                        <div class="position-relative">
+                            <div class="position-absolute rounded-circle bg-danger" style="width: 14px; height: 14px; left: -31px; top: 4px;"></div>
+                            <div class="small fw-bold text-muted text-uppercase mb-1">Drop-off</div>
+                            <div class="fw-bold">{{ $dropoff_city }}</div>
+                            <div class="small">{{ $end->format('d M Y') }}</div>
+                        </div>
+                    </div>
 
-        .form-label {
-            font-weight: 500;
-        }
-    </style>
+                    <!-- Pricing Details -->
+                    <div class="bg-light rounded-4 p-3 vstack gap-2">
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-muted">Duration</span>
+                            <span class="fw-bold">{{ $start->diffInDays($end) + 1 }} Days</span>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-muted">Rate / Day</span>
+                            <span class="fw-bold">₹{{ number_format($car->price_per_day) }}</span>
+                        </div>
+                        <div class="border-top mt-2 pt-2 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Total Amount</span>
+                            <span class="h4 fw-bold text-primary mb-0">₹{{ number_format($total) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{{ route('booking.available') }}?pickup_city={{ $pickup_city }}&dropoff_city={{ $dropoff_city }}&start_date={{ $start_date }}&start_time={{ $start_time }}&end_date={{ $end_date }}&end_time={{ $end_time }}" class="text-decoration-none small fw-bold"><i class="fas fa-arrow-left me-2"></i>Choose a different car</a>
+        </div>
+
+        <!-- Right: Booking Form -->
+        <div class="col-lg-7" data-aos="fade-left">
+            <h4 class="fw-bold mb-4">Your Information</h4>
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                 @if(session('error'))
+                    <div class="alert alert-danger border-0 rounded-3 small">{{ session('error') }}</div>
+                @endif
+
+                <form id="bookingForm" method="POST" action="{{ route('booking.store') }}">
+                    @csrf
+                    <!-- Hidden Fields -->
+                    <input type="hidden" name="car_id" value="{{ $car->id }}">
+                    <input type="hidden" name="pickup_city" value="{{ $pickup_city }}">
+                    <input type="hidden" name="dropoff_city" value="{{ $dropoff_city }}">
+                    <input type="hidden" name="start_date" value="{{ $start_date }}">
+                    <input type="hidden" name="start_time" value="{{ $start_time }}">
+                    <input type="hidden" name="end_date" value="{{ $end_date }}">
+                    <input type="hidden" name="end_time" value="{{ $end_time }}">
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-user text-muted"></i></span>
+                            <input type="text" name="name" class="form-control bg-light border-0" 
+                                   value="{{ old('name', auth()->user()->name ?? '') }}" placeholder="Enter your full name" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-envelope text-muted"></i></span>
+                            <input type="email" name="email" class="form-control bg-light border-0" 
+                                   value="{{ old('email', auth()->user()->email ?? '') }}" placeholder="Enter your email" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Phone Number</label>
+                        <div class="input-group px-3 bg-light rounded-2">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-phone text-muted"></i></span>
+                            <input type="text" name="phone" class="form-control bg-light border-0" 
+                                   value="{{ old('phone', auth()->user()->phone ?? '') }}" placeholder="Enter mobile number" required>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="terms" required>
+                        <label class="form-check-label small text-muted" for="terms">
+                            I agree to the <a href="#" class="text-decoration-none">Rental Agreement</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>.
+                        </label>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm py-3">
+                            Confirm & Proceed to Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="text-center mt-4">
+                 <div class="d-flex justify-content-center gap-4 opacity-50">
+                    <div class="text-center"><i class="fas fa-shield-alt fa-lg mb-1"></i><div class="small">Secure</div></div>
+                    <div class="text-center"><i class="fas fa-bolt fa-lg mb-1"></i><div class="small">Instant</div></div>
+                    <div class="text-center"><i class="fas fa-headset fa-lg mb-1"></i><div class="small">Support</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
-        AOS.init({ duration: 700, once: true });
-
+        AOS.init({ duration: 800, once: true });
+        // Minimal validation styling
         $(document).ready(function () {
-            $('#bookingForm').validate({
-                rules: {
-                    name: { required: true, minlength: 2 },
-                    email: { required: true, email: true },
-                    phone: { required: true, digits: true, minlength: 10 }
-                },
-                messages: {
-                    name: "Enter a valid name",
-                    email: "Enter a valid email",
-                    phone: "Enter a valid phone number"
-                },
-                errorClass: 'is-invalid',
-                validClass: 'is-valid',
-                errorElement: 'div',
-                errorPlacement: function (error, element) {
-                    error.addClass('invalid-feedback');
-                    error.insertAfter(element);
-                }
+             $('#bookingForm').validate({
+                errorClass: 'text-danger small mt-1',
+                errorElement: 'div'
             });
         });
     </script>

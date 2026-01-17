@@ -9,6 +9,7 @@
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.19.5/jquery.validate.min.js"></script> -->
@@ -23,29 +24,54 @@
         /* Navbar */
         .navbar {
             background: linear-gradient(90deg, #d32f2f, #1976d2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            padding: 1rem 0;
+        }
+
+        .navbar.scrolled {
+            padding: 0.6rem 0;
+            background: rgba(13, 17, 23, 0.95) !important;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        body {
+            padding-top: 85px;
         }
 
         .navbar-brand {
-            font-weight: 700;
+            font-weight: 900 !important;
             color: #fff !important;
             font-size: 1.8rem;
-            letter-spacing: 1px;
+            letter-spacing: -1px;
         }
 
         .nav-link {
-            color: #fff !important;
+            color: rgba(255,255,255,0.85) !important;
             font-weight: 600;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem !important;
+            border-radius: 50px;
         }
 
         .nav-link:hover,
         .nav-link:focus {
-            color: #000 !important;
-            text-decoration: underline;
+            color: #fff !important;
+            background: rgba(255,255,255,0.1);
         }
 
         .navbar-toggler {
-            border-color: #fff;
+            border: none;
+            padding: 0;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
         }
 
         .navbar-toggler-icon {
@@ -53,103 +79,52 @@
         }
 
         footer {
-            background-color: #000;
+            background-color: #0d1117;
             color: #fff;
-            padding: 20px 0;
-            font-weight: 600;
-            font-size: 0.9rem;
+            padding: 60px 0;
+            font-weight: 500;
         }
 
         /* Buttons */
         .btn-primary {
-            background-color: #d32f2f;
-            border-color: #d32f2f;
-            font-weight: 600;
+            background-color: #d12e2e;
+            border-color: #d12e2e;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
-            background-color: #b71c1c;
-            border-color: #b71c1c;
+            background-color: #b32525;
+            border-color: #b32525;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(209, 46, 46, 0.3);
         }
 
         /* Headings */
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-weight: 700;
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
         /* Section padding */
         section {
-            padding-top: 4rem;
-            padding-bottom: 4rem;
+            padding: 5rem 0;
         }
 
-        /* Elevate effect on hover */
-        .elevate-on-hover {
+        /* Elevate effect */
+        .hover-lift {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
+        }
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
         }
 
-        .elevate-on-hover:hover,
-        .elevate-on-hover:focus {
-            transform: translateY(-8px) scale(1.03);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-            z-index: 10;
-        }
-
-        .typing-title {
-            font-family: monospace, monospace;
-            overflow: hidden;
-            /* Ensures the content is hidden */
-            white-space: nowrap;
-            border-right: 3px solid #d32f2f;
-            /* Cursor effect */
-            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
-            width: 0;
-            /* Start hidden */
-        }
-
-        @keyframes typing {
-            from {
-                width: 0
-            }
-
-            to {
-                width: 100%
-            }
-        }
-
-        @keyframes blink-caret {
-
-            0%,
-            100% {
-                border-color: transparent
-            }
-
-            50% {
-                border-color: #d32f2f
-            }
-        }
-
-        .theme-accent {
-            color: #e74c3c !important;
-            /* Rich red-orange */
-        }
-
-        .btn-theme {
-            background-color: #e74c3c;
-            color: #fff;
-            border: none;
-        }
-
-        .btn-theme:hover {
-            background-color: #c0392b;
-            color: #fff;
-        }
+        .fw-black { font-weight: 900 !important; }
+        .text-primary { color: #d12e2e !important; }
+        .bg-primary { background-color: #d12e2e !important; }
     </style>
 </head>
 
@@ -214,16 +189,28 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 
     <!-- Page Content -->
-    <main class="py-5">
-        <div class="container">
-            @yield('content')
-        </div>
+    <main>
+        @yield('content')
     </main>
 
     <!-- Footer -->
-    <footer class="text-center">
+    <footer class="text-center py-5">
         <div class="container">
-            <p class="mb-0">&copy; {{ date('Y') }} SwiftRide. All rights reserved.</p>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-md-start mb-3 mb-md-0">
+                    <a class="navbar-brand text-white fs-4" href="{{ url('/') }}">SwiftRide</a>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="#" class="text-white opacity-50"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white opacity-50"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white opacity-50"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <p class="mb-0 small text-muted">&copy; {{ date('Y') }} SwiftRide. All rights reserved.</p>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -240,6 +227,16 @@
     @yield('scripts')
     @stack('scripts')
 
+    <script>
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+    </script>
 </body>
 
 </html>

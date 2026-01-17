@@ -22,6 +22,11 @@
             </a>
         </li>
         <li>
+            <a href="{{ route('admin.calendar') }}" class="nav-link text-white @if(request()->routeIs('admin.calendar')) active @endif">
+                <i class="fas fa-calendar-alt me-2"></i> Calendar
+            </a>
+        </li>
+        <li>
             <a href="{{ route('admin.users') }}" class="nav-link text-white @if(request()->routeIs('admin.users')) active @endif">
                 <i class="fas fa-users me-2"></i> Users
             </a>
