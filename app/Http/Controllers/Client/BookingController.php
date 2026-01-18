@@ -19,6 +19,16 @@ class BookingController extends Controller
     protected array $cities = ['Rajkot', 'Ahmedabad', 'Vadodara', 'Surat', 'Jamnagar'];
     protected int $bufferHours = 8; // Admin-defined buffer
 
+    public function dashboard()
+    {
+        $bookings = Booking::where('user_id', Auth::id())
+            ->with('car')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('client.dashboard', compact('bookings'));
+    }
+
     public function selectCriteria()
     {
         return view('client.booking.select_criteria', [
@@ -52,6 +62,12 @@ class BookingController extends Controller
         $end_date = $request->query('end_date');
         $end_time = $request->query('end_time');
 
+        // Filters
+        $max_price = $request->query('max_price');
+        $transmission = $request->query('transmission');
+        $fuel_type = $request->query('fuel_type');
+        $sort_by = $request->query('sort_by', 'popular');
+
         if (!$pickup_city || !$dropoff_city || !$start_date || !$start_time || !$end_date || !$end_time) {
             return redirect()->route('booking.selectCriteria')
                 ->withErrors(['missing' => 'Please submit the form to view available cars.']);
@@ -65,11 +81,36 @@ class BookingController extends Controller
                 ->withErrors(['end_time' => 'End time must be after start time'])->withInput();
         }
 
-        $availableCars = Car::all()->filter(function ($car) use ($start, $end) {
+        // Base Query for available cars
+        $query = Car::where('status', 'available');
+
+        // Filter out cars with conflicts
+        $availableCars = $query->get()->filter(function ($car) use ($start, $end) {
             return !$this->hasConflict($car->id, $start, $end);
         });
 
-        return view('client.booking.available_cars', [
+        // Apply dynamic filters post-collection or convert to query if possible
+        // For simplicity and to handle the 'hasConflict' logic easily, we'll continue with collection filtering
+        if ($max_price) {
+            $availableCars = $availableCars->where('price_per_day', '<=', $max_price);
+        }
+        if ($transmission && $transmission !== 'All') {
+            $availableCars = $availableCars->where('transmission', $transmission);
+        }
+        if ($fuel_type && $fuel_type !== 'All') {
+            $availableCars = $availableCars->where('fuel_type', $fuel_type);
+        }
+
+        // Sorting
+        if ($sort_by === 'price_low') {
+            $availableCars = $availableCars->sortBy('price_per_day');
+        } elseif ($sort_by === 'price_high') {
+            $availableCars = $availableCars->sortByDesc('price_per_day');
+        } elseif ($sort_by === 'newest') {
+            $availableCars = $availableCars->sortByDesc('year');
+        }
+
+        $data = [
             'availableCars' => $availableCars,
             'pickup_city' => $pickup_city,
             'dropoff_city' => $dropoff_city,
@@ -77,7 +118,13 @@ class BookingController extends Controller
             'start_time' => $start_time,
             'end_date' => $end_date,
             'end_time' => $end_time,
-        ]);
+        ];
+
+        if ($request->ajax()) {
+            return view('client.partials.car-grid', $data)->render();
+        }
+
+        return view('client.booking.available_cars', $data);
     }
 
     public function confirm(Request $request)
@@ -131,6 +178,7 @@ class BookingController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|email',
             'phone' => 'required|string|max:15',
+            'coupon_code' => 'nullable|string|exists:coupons,code',
         ]);
 
         $start = Carbon::parse("{$request->start_date} {$request->start_time}");
@@ -145,6 +193,18 @@ class BookingController extends Controller
         $days = $start->diffInDays($end) + 1;
         $total = $days * $car->price_per_day;
 
+        // Check for Coupon
+        $discount = 0;
+        $couponCode = $request->coupon_code;
+        if ($couponCode) {
+            $coupon = \App\Models\Coupon::where('code', $couponCode)->first();
+            if ($coupon && $coupon->isValid($total)) {
+                $discount = $coupon->calculateDiscount($total);
+            } else {
+                return back()->with('error', 'Coupon is invalid or expired.')->withInput();
+            }
+        }
+
         // Create booking with PENDING status
         $booking = Booking::create([
             'user_id' => Auth::id(),
@@ -156,7 +216,9 @@ class BookingController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'total_price' => $total,
+            'total_price' => $total - $discount, // Final price
+            'coupon_code' => $couponCode,
+            'discount_amount' => $discount,
             'status' => 'pending' // pending until payment
         ]);
 
@@ -188,7 +250,6 @@ class BookingController extends Controller
         $booking->status = 'confirmed';
         $booking->save();
 
-        // 2. Record Revenue (Mock Payment)
         Revenue::create([
             'booking_id' => $booking->id,
             'amount' => $booking->total_price,
@@ -196,7 +257,20 @@ class BookingController extends Controller
             'status' => 'received',
         ]);
 
-        // 3. Send Emails (Now moved here after payment)
+        // 3. Award Loyalty Points
+        $user = Auth::user();
+        $earnedPoints = floor($booking->total_price / 100); // 1 point per 100 spent (e.g. 1000 = 10 points)
+        $user->loyalty_points += $earnedPoints;
+        
+        // Update Membership Tier
+        if ($user->loyalty_points >= 15000) {
+            $user->membership_tier = 'Platinum';
+        } elseif ($user->loyalty_points >= 5000) {
+            $user->membership_tier = 'Gold';
+        }
+        $user->save();
+
+        // 4. Send Emails (Now moved here after payment)
         $booking->load(['car', 'user']);
 
         // Send email to customer
@@ -225,6 +299,33 @@ class BookingController extends Controller
     {
         $booking = Booking::with('car')->where('user_id', Auth::id())->findOrFail($id);
         return view('client.booking.success', compact('booking'));
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+            'amount' => 'required|numeric'
+        ]);
+
+        $coupon = \App\Models\Coupon::where('code', $request->code)->first();
+
+        if (!$coupon) {
+            return response()->json(['success' => false, 'message' => 'Coupon code not found.']);
+        }
+
+        if (!$coupon->isValid($request->amount)) {
+            return response()->json(['success' => false, 'message' => 'Coupon is expired or minimum amount not met.']);
+        }
+
+        $discount = $coupon->calculateDiscount($request->amount);
+
+        return response()->json([
+            'success' => true,
+            'discount' => $discount,
+            'new_total' => $request->amount - $discount,
+            'message' => 'Coupon applied successfully!'
+        ]);
     }
 
     public function myBookings()

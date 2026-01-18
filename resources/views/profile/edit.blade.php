@@ -23,6 +23,9 @@
                         <a class="list-group-item list-group-item-action border-0 py-3" id="security-tab" data-bs-toggle="list" href="#security" role="tab">
                             <i class="fas fa-shield-alt me-3 opacity-50"></i> Security
                         </a>
+                        <a class="list-group-item list-group-item-action border-0 py-3 text-{{ auth()->user()->is_verified ? 'success' : 'warning' }}" id="verification-tab" data-bs-toggle="list" href="#verification" role="tab">
+                            <i class="fas fa-{{ auth()->user()->is_verified ? 'check-circle' : 'id-card' }} me-3 opacity-50"></i> Verification
+                        </a>
                         <a class="list-group-item list-group-item-action border-0 py-3 text-danger" id="danger-tab" data-bs-toggle="list" href="#danger" role="tab">
                             <i class="fas fa-trash-alt me-3 opacity-50"></i> Danger Zone
                         </a>
@@ -43,10 +46,17 @@
                             @csrf
                             @method('patch')
 
-                            <div class="mb-4">
-                                <label class="form-label small fw-bold text-muted text-uppercase">Full Name</label>
-                                <input type="text" name="name" class="form-control bg-light border-0 py-3" value="{{ old('name', $user->name) }}" required>
-                                @error('name') <small class="text-danger">{{ $message }}</small> @enderror
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted text-uppercase">Full Name</label>
+                                    <input type="text" name="name" class="form-control bg-light border-0 py-3" value="{{ old('name', $user->name) }}" required>
+                                    @error('name') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted text-uppercase">Phone Number</label>
+                                    <input type="text" name="phone" class="form-control bg-light border-0 py-3" value="{{ old('phone', $user->phone) }}" placeholder="e.g. +91 98765 43210">
+                                    @error('phone') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
                             </div>
 
                             <div class="mb-4">
@@ -108,6 +118,59 @@
                     </div>
                 </div>
 
+                <!-- Verification -->
+                <div class="tab-pane fade" id="verification" role="tabpanel">
+                    <h4 class="fw-bold mb-4">Account Verification</h4>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                        <div class="text-center mb-5">
+                            @if(auth()->user()->is_verified)
+                                <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-check-double fa-3x"></i>
+                                </div>
+                                <h4 class="fw-bold text-success">Verified Account</h4>
+                                <p class="text-muted small">Your identity has been verified by our team. You have full access to all features.</p>
+                            @else
+                                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-shield-alt fa-3x"></i>
+                                </div>
+                                <h4 class="fw-bold">Verification Required</h4>
+                                <p class="text-muted small">To start renting cars, we need to verify your driving license.</p>
+                            @endif
+                        </div>
+
+                        <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+                            @csrf
+                            @method('patch')
+
+                            <div class="mb-5">
+                                <label class="form-label small fw-bold text-muted text-uppercase mb-3 d-block text-center">Driving License Document</label>
+                                
+                                <div class="p-4 border border-dashed rounded-4 text-center bg-light mb-3">
+                                    @if(auth()->user()->driving_license)
+                                        <div class="mb-3">
+                                            <img src="{{ asset('storage/' . auth()->user()->driving_license) }}" class="rounded shadow-sm" style="max-height: 150px;" alt="License">
+                                        </div>
+                                        <p class="small text-success fw-bold mb-1"><i class="fas fa-file-image me-2"></i> Document Uploaded</p>
+                                        <p class="x-small text-muted mb-0">You can upload a new one to replace it.</p>
+                                    @else
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-secondary opacity-25 mb-3"></i>
+                                        <p class="small text-muted mb-0">Drag and drop or click to upload JPEG/PNG</p>
+                                        <p class="x-small text-muted">Max size: 2MB</p>
+                                    @endif
+                                    <input type="file" name="driving_license" class="form-control mt-3" accept="image/*">
+                                    @error('driving_license') <small class="text-danger mt-2">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-dark rounded-pill py-3 fw-bold shadow-sm">
+                                    {{ auth()->user()->driving_license ? 'Update Document' : 'Submit for Verification' }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Danger Zone -->
                 <div class="tab-pane fade" id="danger" role="tabpanel">
                     <h4 class="fw-bold text-danger mb-4">Danger Zone</h4>
@@ -164,4 +227,34 @@
         border: 1px solid rgba(13, 110, 253, 0.2) !important;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Tab Persistence (using localStorage)
+        const activeTab = localStorage.getItem('profileActiveTab');
+        if (activeTab) {
+            const tabEl = document.querySelector(`a[href="${activeTab}"]`);
+            if (tabEl) {
+                const tab = new bootstrap.Tab(tabEl);
+                tab.show();
+            }
+        }
+
+        // 2. Auto-switch tab if there are errors
+        @if($errors->hasAny(['driving_license']))
+            const verificationTab = new bootstrap.Tab(document.querySelector('#verification-tab'));
+            verificationTab.show();
+        @elseif($errors->hasAny(['current_password', 'password']))
+            const securityTab = new bootstrap.Tab(document.querySelector('#security-tab'));
+            securityTab.show();
+        @endif
+
+        // 3. Save active tab on click
+        document.querySelectorAll('a[data-bs-toggle="list"]').forEach(tabLink => {
+            tabLink.addEventListener('shown.bs.tab', function (e) {
+                localStorage.setItem('profileActiveTab', e.target.getAttribute('href'));
+            });
+        });
+    });
+</script>
 @endsection

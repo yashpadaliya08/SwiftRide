@@ -74,10 +74,24 @@
                             <span class="text-muted">Rate / Day</span>
                             <span class="fw-bold">₹{{ number_format($car->price_per_day) }}</span>
                         </div>
+                        <div class="border-top mt-2 pt-2 d-flex justify-content-between align-items-center" id="discount-row" style="display: none !important;">
+                            <span class="text-success small">Discount</span>
+                            <span class="text-success fw-bold" id="discount-amount">-₹0</span>
+                        </div>
                         <div class="border-top mt-2 pt-2 d-flex justify-content-between align-items-center">
                             <span class="fw-bold">Total Amount</span>
-                            <span class="h4 fw-bold text-primary mb-0">₹{{ number_format($total) }}</span>
+                            <span class="h4 fw-bold text-primary mb-0" id="final-total">₹{{ number_format($total) }}</span>
                         </div>
+                    </div>
+
+                    <!-- Promo Code Input -->
+                    <div class="mt-4 pt-3 border-top">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Have a promo code?</label>
+                        <div class="input-group">
+                            <input type="text" id="coupon_input" class="form-control bg-light border-0" placeholder="Enter code">
+                            <button class="btn btn-dark px-3" type="button" id="apply_coupon_btn">Apply</button>
+                        </div>
+                        <div id="coupon_msg" class="x-small mt-2"></div>
                     </div>
                 </div>
             </div>
@@ -103,6 +117,7 @@
                     <input type="hidden" name="start_time" value="{{ $start_time }}">
                     <input type="hidden" name="end_date" value="{{ $end_date }}">
                     <input type="hidden" name="end_time" value="{{ $end_time }}">
+                    <input type="hidden" name="coupon_code" id="hidden_coupon_code">
 
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-muted text-uppercase">Full Name</label>
@@ -168,6 +183,43 @@
              $('#bookingForm').validate({
                 errorClass: 'text-danger small mt-1',
                 errorElement: 'div'
+            });
+
+            $('#apply_coupon_btn').on('click', function() {
+                const code = $('#coupon_input').val();
+                if(!code) return;
+
+                const btn = $(this);
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.ajax({
+                    url: '{{ route('coupons.apply') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        code: code,
+                        amount: {{ $total }}
+                    },
+                    success: function(response) {
+                        if(response.success) {
+                            $('#discount-row').attr('style', 'display: flex !important;');
+                            $('#discount-amount').text('-₹' + response.discount.toLocaleString());
+                            $('#final-total').text('₹' + response.new_total.toLocaleString());
+                            $('#hidden_coupon_code').val(code);
+                            $('#coupon_msg').removeClass('text-danger').addClass('text-success').text(response.message);
+                            $('#coupon_input').prop('readonly', true);
+                            btn.hide();
+                        } else {
+                            $('#coupon_msg').removeClass('text-success').addClass('text-danger').text(response.message);
+                        }
+                    },
+                    error: function() {
+                        $('#coupon_msg').addClass('text-danger').text('Error applying coupon.');
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false).text('Apply');
+                    }
+                });
             });
         });
     </script>

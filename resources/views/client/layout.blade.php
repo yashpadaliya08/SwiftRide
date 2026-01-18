@@ -143,7 +143,7 @@
                 <ul class="navbar-nav ms-auto gap-3 align-items-center">
 
                     <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('booking.selectCriteria') }}">Browse Cars</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('browse') }}">Browse Cars</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url('/my_bookings') }}">My Bookings</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url('/about') }}">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url('/contact') }}">Contact</a></li>
@@ -169,7 +169,8 @@
                                 {{ Auth::user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt me-2 opacity-50"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user-edit me-2 opacity-50"></i> Edit Profile</a></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf

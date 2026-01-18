@@ -8,12 +8,16 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
+        'loyalty_points',
+        'membership_tier',
+        'phone',
+        'driving_license',
+        'is_verified',
     ];
 
     protected $hidden = [
@@ -29,5 +33,10 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

@@ -31,8 +31,8 @@
                                 <label class="form-label small fw-bold text-muted text-uppercase">Pick-up Location</label>
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text bg-light border-end-0 text-primary"><i class="fas fa-map-marker-alt"></i></span>
-                                    <select name="pickup_city" id="pickup_city" class="form-select bg-light border-start-0 ps-0" required>
-                                        <option value="">Select City</option>
+                                    <select name="pickup_city" id="pickup_city" class="form-select bg-light border-start-0 ps-0 shadow-none custom-select" required>
+                                        <option value="">Choose City</option>
                                         @foreach ($cities as $city)
                                             <option value="{{ $city }}" {{ old('pickup_city') == $city ? 'selected' : '' }}>{{ $city }}</option>
                                         @endforeach
@@ -44,8 +44,8 @@
                                 <label class="form-label small fw-bold text-muted text-uppercase">Drop-off Location</label>
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text bg-light border-end-0 text-danger"><i class="fas fa-map-marker-alt"></i></span>
-                                    <select name="dropoff_city" id="dropoff_city" class="form-select bg-light border-start-0 ps-0" required>
-                                        <option value="">Select City</option>
+                                    <select name="dropoff_city" id="dropoff_city" class="form-select bg-light border-start-0 ps-0 shadow-none custom-select" required>
+                                        <option value="">Choose City</option>
                                         @foreach ($cities as $city)
                                             <option value="{{ $city }}" {{ old('dropoff_city') == $city ? 'selected' : '' }}>{{ $city }}</option>
                                         @endforeach
@@ -114,15 +114,30 @@
         .rotate-img:hover { transform: rotate(0deg); }
         
         .form-select, .form-control {
-            border-color: #dee2e6;
+            border-color: #e9ecef !important;
             padding: 0.75rem 1rem;
             font-weight: 500;
+            border-radius: 12px;
+            transition: all 0.2s ease;
         }
         .form-select:focus, .form-control:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+            border-color: #d12e2e !important;
+            box-shadow: 0 0 0 4px rgba(209, 46, 46, 0.1) !important;
+            background-color: #fff !important;
         }
-        .input-group-text { font-size: 1.1rem; }
+        .input-group-text { 
+            font-size: 1.1rem;
+            border-radius: 12px;
+            border-color: #e9ecef !important;
+        }
+        .custom-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
+        }
     </style>
 @endsection
 

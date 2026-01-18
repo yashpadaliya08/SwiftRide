@@ -22,6 +22,8 @@ class Booking extends Model
         'name',
         'email',
         'phone',
+        'coupon_code',
+        'discount_amount',
     ];
 
     protected $casts = [

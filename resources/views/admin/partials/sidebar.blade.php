@@ -32,6 +32,11 @@
             </a>
         </li>
         <li>
+            <a href="{{ route('admin.reviews.index') }}" class="nav-link text-white @if(request()->routeIs('admin.reviews.*')) active @endif">
+                <i class="fas fa-star me-2"></i> Reviews
+            </a>
+        </li>
+        <li>
             <a href="{{ route('admin.messages') }}" class="nav-link text-white @if(request()->routeIs('admin.messages')) active @endif">
                 <i class="fas fa-envelope me-2"></i> Messages
             </a>
@@ -39,6 +44,11 @@
         <li>
             <a href="{{ route('admin.reports') }}" class="nav-link text-white @if(request()->routeIs('admin.reports')) active @endif">
                 <i class="fas fa-chart-bar me-2"></i> Reports
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.coupons.index') }}" class="nav-link text-white @if(request()->routeIs('admin.coupons.*')) active @endif">
+                <i class="fas fa-tag me-2"></i> Coupons
             </a>
         </li>
         <li>

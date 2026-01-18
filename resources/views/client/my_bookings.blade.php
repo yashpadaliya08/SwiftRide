@@ -39,15 +39,15 @@
     @else
         <!-- Tabs Navigation -->
         <div class="mb-4" data-aos="fade-up">
-            <ul class="nav nav-pills gap-2 bg-light p-2 rounded-pill d-inline-flex" id="bookingTab" role="tablist">
+            <ul class="nav nav-pills gap-2 bg-light p-2 rounded-pill d-inline-flex border" id="bookingTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active rounded-pill px-4 fw-bold" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">All</button>
+                    <button class="nav-link active rounded-pill px-4 fw-bold text-dark-emphasis" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">All Trips</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link rounded-pill px-4 fw-bold" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab">Upcoming</button>
+                    <button class="nav-link rounded-pill px-4 fw-bold text-dark-emphasis" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab">Upcoming</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link rounded-pill px-4 fw-bold" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">Past Trips</button>
+                    <button class="nav-link rounded-pill px-4 fw-bold text-dark-emphasis" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">Past History</button>
                 </li>
             </ul>
         </div>
@@ -61,7 +61,7 @@
             
             <!-- UPCOMING TAB -->
             <div class="tab-pane fade" id="upcoming" role="tabpanel">
-                @php $upcoming = $bookings->whereIn('status', ['confirmed', 'pending'])->filter(fn($b) => $b->end_datetime >= now()); @endphp
+                @php $upcoming = $bookings->filter(fn($b) => in_array($b->status, ['confirmed', 'pending']) && \Carbon\Carbon::parse($b->end_datetime)->isFuture()); @endphp
                 @if($upcoming->count() > 0)
                     @include('client.partials.booking-list', ['filtered_bookings' => $upcoming])
                 @else
@@ -71,7 +71,7 @@
 
             <!-- COMPLETED TAB -->
             <div class="tab-pane fade" id="completed" role="tabpanel">
-                @php $history = $bookings->where('status', 'completed')->merge($bookings->where('status', 'cancelled')); @endphp
+                @php $history = $bookings->filter(fn($b) => $b->status == 'completed' || $b->status == 'cancelled' || ($b->status == 'confirmed' && \Carbon\Carbon::parse($b->end_datetime)->isPast())); @endphp
                 @if($history->count() > 0)
                     @include('client.partials.booking-list', ['filtered_bookings' => $history])
                 @else
@@ -113,6 +113,45 @@
     </div>
 </div>
 
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-5 overflow-hidden">
+            <div class="modal-header border-0 bg-warning text-dark p-4">
+                <h5 class="modal-title fw-black"><i class="fas fa-star me-2"></i>Rate Your Trip</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 p-md-5">
+                <form action="{{ route('reviews.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="booking_id" id="review_booking_id">
+                    
+                    <div class="mb-4 text-center">
+                        <div class="rating-stars h3">
+                            <i class="far fa-star rating-star" data-value="1" style="cursor: pointer;"></i>
+                            <i class="far fa-star rating-star" data-value="2" style="cursor: pointer;"></i>
+                            <i class="far fa-star rating-star" data-value="3" style="cursor: pointer;"></i>
+                            <i class="far fa-star rating-star" data-value="4" style="cursor: pointer;"></i>
+                            <i class="far fa-star rating-star" data-value="5" style="cursor: pointer;"></i>
+                        </div>
+                        <input type="hidden" name="rating" id="review_rating" value="5">
+                        <small class="text-muted d-block mt-2">Click a star to rate</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Your Review</label>
+                        <textarea name="comment" class="form-control bg-light border-0 px-3 py-2 rounded-3" rows="3" placeholder="Tell others about the car and service..."></textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning rounded-pill py-3 fw-bold shadow-sm">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     .nav-pills .nav-link {
         color: #6c757d;
@@ -120,8 +159,8 @@
     }
     .nav-pills .nav-link.active {
         color: #fff !important;
-        background: #d12e2e !important;
-        box-shadow: 0 4px 15px rgba(209, 46, 46, 0.2);
+        background: #0d1117 !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     .dropdown-item:active {
         background-color: #d12e2e;
@@ -138,6 +177,34 @@
             let cancelUrl = `{{ url('booking/my-bookings') }}/${bookingId}/cancel`;
             $('#cancelForm').attr('action', cancelUrl);
         });
+
+        // Handle Review modal
+        $(document).on('click', '.rate-btn', function() {
+            $('#review_booking_id').val($(this).data('booking-id'));
+            resetRating();
+        });
+
+        $('.rating-star').on('click', function() {
+            const val = $(this).data('value');
+            $('#review_rating').val(val);
+            setRating(val);
+        });
+
+        function setRating(val) {
+            $('.rating-star').each(function() {
+                if($(this).data('value') <= val) {
+                    $(this).removeClass('far').addClass('fas text-warning');
+                } else {
+                    $(this).removeClass('fas text-warning').addClass('far');
+                }
+            });
+        }
+
+        function resetRating() {
+            const val = 5;
+            $('#review_rating').val(val);
+            setRating(val);
+        }
 
         // Optional: Smoothly switch tabs via URL hash or dropdown
         $('a[data-bs-toggle="tab"]').on('click', function (e) {

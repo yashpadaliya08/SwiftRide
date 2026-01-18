@@ -18,7 +18,7 @@
         
         <!-- Quick Search Box -->
         <div class="card border-0 shadow-lg rounded-5 bg-white p-3 mx-auto search-glass-card" style="max-width: 900px;" data-aos="fade-up" data-aos-delay="400">
-            <form action="{{ route('booking.selectCriteria') }}" method="GET" class="row g-2 align-items-center">
+            <form action="{{ route('browse') }}" method="GET" class="row g-2 align-items-center">
                 <div class="col-md-4">
                     <div class="input-group bg-light rounded-pill px-3 py-1">
                         <span class="input-group-text bg-transparent border-0 text-primary"><i class="fas fa-map-marker-alt"></i></span>
@@ -153,7 +153,7 @@
                     <h2 class="display-4 fw-black text-white mb-3">Ready to experience the best?</h2>
                     <p class="lead text-white opacity-75 mb-5">Join thousands of happy customers and start your premium journey today.</p>
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="{{ route('booking.selectCriteria') }}" class="btn btn-primary rounded-pill px-5 py-3 fw-bold">Book a Ride Now</a>
+                        <a href="{{ route('browse') }}" class="btn btn-primary rounded-pill px-5 py-3 fw-bold">Book a Ride Now</a>
                         <a href="{{ route('browse') }}" class="btn btn-outline-white border-2 rounded-pill px-5 py-3 fw-bold text-white">Browse Cars</a>
                     </div>
                 </div>

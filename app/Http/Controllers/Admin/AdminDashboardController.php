@@ -16,7 +16,7 @@ class AdminDashboardController extends Controller
     }
     public function registeredUsers()
     {
-        $users = \App\Models\User::all();
+        $users = User::latest()->get();
         return view('admin.users', compact('users'));
     }
     public function dashboard()
@@ -26,6 +26,7 @@ class AdminDashboardController extends Controller
         $bookingCount = Booking::count();
         $carCount = Car::count();
         $totalRevenue = Booking::whereIn('status', ['confirmed', 'completed'])->sum('total_price');
+        $verifiedUserCount = User::where('is_verified', true)->count();
 
         // 2. Recent Bookings (Table)
         $recentBookings = Booking::with(['user', 'car'])
@@ -72,7 +73,8 @@ class AdminDashboardController extends Controller
             'months',
             'revenueData',
             'carTypes',
-            'carTypeCounts'
+            'carTypeCounts',
+            'verifiedUserCount'
         ));
     }
 

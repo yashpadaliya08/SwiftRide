@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\Client\BookingController as ClientBookingController;
 use App\Http\Controllers\Client\CarBrowseController;
@@ -14,6 +16,7 @@ use App\Http\Controllers\Client\ClientAuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\ReviewController;
 
 
 // Public
@@ -22,7 +25,9 @@ Route::get('/', [HomeController::class, 'index'])->name('client.home');
 Route::view('/about', 'client.about')->name('about');
 Route::view('/contact', 'client.contact')->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
-Route::get('/cars', [CarController::class, 'index'])->name('cars.index');
+Route::get('/cars', [CarBrowseController::class, 'index'])->name('browse');
+Route::get('/car/{id}', [CarBrowseController::class, 'show'])->name('car.details');
+Route::get('/cars-admin-legacy', [CarController::class, 'index'])->name('cars.index');
 
 // Client Auth - Only accessible when NOT logged in as client
 Route::middleware('guest:web')->group(function () {
@@ -40,10 +45,8 @@ Route::middleware('guest:admin')->group(function () {
 
 // Client Authenticated - Must be logged in as client (web guard) with client role
 Route::middleware(['auth:web', \App\Http\Middleware\EnsureClientRole::class, 'verified'])->group(function () {
-    Route::get('/dashboard', fn() => view('client.dashboard'))->name('dashboard');
+    Route::get('/dashboard', [ClientBookingController::class, 'dashboard'])->name('dashboard');
 
-    Route::get('/browse', [CarBrowseController::class, 'index'])->name('browse');
-    Route::get('/car/{id}', [CarBrowseController::class, 'show'])->name('car.details');
 
     // Booking Flow
     Route::prefix('booking')->name('booking.')->group(function () {
@@ -61,6 +64,9 @@ Route::middleware(['auth:web', \App\Http\Middleware\EnsureClientRole::class, 've
         Route::get('/{booking}/success', [ClientBookingController::class, 'success'])->name('success');
 
     });
+
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/coupons/apply', [ClientBookingController::class, 'applyCoupon'])->name('coupons.apply');
 
     Route::get('/my_bookings', [ClientBookingController::class, 'myBookings'])->name('booking.myBookings');
 
@@ -92,7 +98,16 @@ Route::prefix('admin')
         });
 
         Route::get('/users', [UserController::class, 'index'])->name('users');
+        Route::patch('/users/{id}/verify', [UserController::class, 'verify'])->name('users.verify');
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+        
+        Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+        Route::patch('/reviews/{id}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
+        Route::delete('/reviews/{id}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
+
+        Route::resource('coupons', AdminCouponController::class)->except(['create', 'edit', 'show', 'update']);
+        Route::patch('/coupons/{coupon}/toggle', [AdminCouponController::class, 'toggle'])->name('coupons.toggle');
+
         Route::get('/calendar', [AdminDashboardController::class, 'calendar'])->name('calendar'); 
         Route::get('/reports', [AdminReportController::class, 'reports'])->name('reports');
         Route::view('/settings', 'admin.settings')->name('settings');

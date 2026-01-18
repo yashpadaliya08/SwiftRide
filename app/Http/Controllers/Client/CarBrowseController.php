@@ -15,7 +15,7 @@ class CarBrowseController extends Controller
     }
     public function show($id)
     {
-        $car = Car::findOrFail($id);
+        $car = Car::with(['approvedReviews.user'])->findOrFail($id);
         return view('client.car-details', compact('car'));
     }
 

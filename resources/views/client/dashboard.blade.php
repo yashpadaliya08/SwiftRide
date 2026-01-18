@@ -54,7 +54,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted text-uppercase fw-bold mb-1 small">Loyalty Points</h6>
-                            <h4 class="mb-0 fw-bold">{{ $bookings->count() * 100 }}</h4>
+                            <h4 class="mb-0 fw-bold">{{ number_format(Auth::user()->loyalty_points) }}</h4>
                         </div>
                     </div>
                 </div>
@@ -151,8 +151,13 @@
                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 fs-3 fw-bold" style="width: 80px; height: 80px;">
                     {{ substr(Auth::user()->name, 0, 1) }}
                 </div>
-                <h5 class="fw-bold">{{ Auth::user()->name }}</h5>
-                <p class="text-muted small mb-3">{{ Auth::user()->email }}</p>
+                    <h5 class="fw-bold mb-0">{{ Auth::user()->name }}</h5>
+                    <div class="mb-3">
+                        <span class="badge {{ Auth::user()->membership_tier == 'Platinum' ? 'bg-info' : (Auth::user()->membership_tier == 'Gold' ? 'bg-warning text-dark' : 'bg-secondary') }} rounded-pill px-3">
+                            <i class="fas fa-crown me-1"></i> {{ Auth::user()->membership_tier }} Member
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-4">{{ Auth::user()->email }}</p>
                 <div class="d-grid gap-2">
                     <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary btn-sm rounded-pill">Edit Profile</a>
                 </div>

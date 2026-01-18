@@ -11,16 +11,21 @@
                             </div>
                             <h6 class="fw-bold mb-1 text-dark">{{ $booking->car->brand }} {{ $booking->car->model }}</h6>
                             @php
+                                $displayStatus = $booking->status;
+                                if ($booking->status == 'confirmed' && \Carbon\Carbon::parse($booking->end_datetime)->isPast()) {
+                                    $displayStatus = 'completed';
+                                }
+
                                 $statusClasses = [
-                                    'confirmed' => 'bg-success bg-opacity-10 text-success',
-                                    'pending' => 'bg-warning bg-opacity-10 text-warning text-dark',
-                                    'cancelled' => 'bg-danger bg-opacity-10 text-danger',
-                                    'completed' => 'bg-primary bg-opacity-10 text-primary',
+                                    'confirmed' => 'bg-success text-white',
+                                    'pending' => 'bg-warning text-dark',
+                                    'cancelled' => 'bg-danger text-white',
+                                    'completed' => 'bg-primary text-white',
                                 ];
-                                $statusClass = $statusClasses[$booking->status] ?? 'bg-secondary bg-opacity-10 text-secondary';
+                                $statusClass = $statusClasses[$displayStatus] ?? 'bg-secondary text-white';
                             @endphp
                             <span class="badge {{ $statusClass }} rounded-pill px-3 py-2 text-uppercase fw-bold x-small">
-                                {{ $booking->status }}
+                                {{ $displayStatus }}
                             </span>
                         </div>
                     </div>
@@ -69,7 +74,11 @@
                             @else
                                 <a href="{{ route('booking.payment', $booking->id) }}" class="btn btn-dark w-100 rounded-pill fw-bold">View Receipt</a>
                                 @if($booking->status == 'completed')
-                                    <button class="btn btn-outline-primary w-100 rounded-pill fw-bold btn-sm">Rate Experience</button>
+                                    <button class="btn btn-outline-primary w-100 rounded-pill fw-bold btn-sm rate-btn" 
+                                        data-bs-toggle="modal" data-bs-target="#reviewModal" 
+                                        data-booking-id="{{ $booking->id }}">
+                                        Rate Experience
+                                    </button>
                                 @endif
                             @endif
                         </div>

@@ -105,7 +105,7 @@
                             </div>
                             <div class="flex-grow-1 mx-4 position-relative text-center" style="height: 2px; background: #dee2e6;">
                                 <div class="position-absolute top-50 start-50 translate-middle bg-white px-2 text-muted small fw-bold">
-                                    {{ \Carbon\Carbon::parse($booking->start_datetime)->diffInDays(\Carbon\Carbon::parse($booking->end_datetime)) }} Days
+                                    {{ round(\Carbon\Carbon::parse($booking->start_datetime)->diffInHours(\Carbon\Carbon::parse($booking->end_datetime)) / 24) ?: 1 }} Days
                                 </div>
                             </div>
                             <div class="text-center">
@@ -124,19 +124,19 @@
                                 <tbody>
                                     <tr class="border-bottom">
                                         <td class="text-muted">Daily Rate</td>
-                                        <td class="text-end fw-bold">₹{{ number_format($booking->car->price_per_day, 2) }}</td>
+                                        <td class="text-end fw-bold">₹{{ number_format($booking->car->price_per_day) }}</td>
                                     </tr>
                                     <tr class="border-bottom">
                                         <td class="text-muted">Duration</td>
-                                        <td class="text-end fw-bold">{{ \Carbon\Carbon::parse($booking->start_datetime)->diffInDays(\Carbon\Carbon::parse($booking->end_datetime)) }} Days</td>
+                                        <td class="text-end fw-bold">{{ round(\Carbon\Carbon::parse($booking->start_datetime)->diffInHours(\Carbon\Carbon::parse($booking->end_datetime)) / 24) ?: 1 }} Days</td>
                                     </tr>
                                     <tr class="border-bottom">
                                         <td class="text-muted">Taxes & Fees (5%)</td>
-                                        <td class="text-end fw-bold">₹{{ number_format($booking->total_price * 0.05, 2) }}</td>
+                                        <td class="text-end fw-bold">₹{{ number_format($booking->total_price * 0.05) }}</td>
                                     </tr>
-                                    <tr class="bg-primary bg-opacity-10">
-                                        <td class="fw-bold text-primary fs-5 ps-3">Total Amount</td>
-                                        <td class="text-end fw-bold text-primary fs-5 pe-3">₹{{ number_format($booking->total_price, 2) }}</td>
+                                    <tr class="table-dark">
+                                        <td class="fw-bold fs-5 ps-3">Total Amount</td>
+                                        <td class="text-end fw-bold fs-5 pe-3">₹{{ number_format($booking->total_price) }}</td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -53,7 +53,7 @@
                     </div>
                     <div>
                         <h6 class="text-muted text-uppercase fw-bold mb-1 small">Verified Users</h6>
-                        <h3 class="mb-0 fw-bold text-dark">{{ $users->count() }}</h3>
+                        <h3 class="mb-0 fw-bold text-dark">{{ $users->where('is_verified', true)->count() }}</h3>
                     </div>
                 </div>
             </div>
@@ -104,9 +104,19 @@
                                 <div class="small text-muted">{{ $user->created_at->diffForHumans() }}</div>
                             </td>
                             <td>
-                                <span class="badge bg-success px-3 py-2 rounded-pill">
-                                    <i class="fas fa-check-circle me-1"></i> Active
-                                </span>
+                                @if($user->is_verified)
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+                                        <i class="fas fa-check-circle me-1"></i> Verified
+                                    </span>
+                                @elseif($user->driving_license)
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 rounded-pill">
+                                        <i class="fas fa-hourglass-half me-1"></i> Pending
+                                    </span>
+                                @else
+                                    <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">
+                                        <i class="fas fa-user-clock me-1"></i> Unverified
+                                    </span>
+                                @endif
                             </td>
                             <td class="text-end pe-4">
                                 <div class="dropdown">
@@ -115,6 +125,12 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
                                         <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2 text-primary"></i> View History</a></li>
+                                        @if($user->driving_license && !$user->is_verified)
+                                            <li><a class="dropdown-item verify-btn" href="#" data-bs-toggle="modal" data-bs-target="#verifyModal" 
+                                                   data-user-id="{{ $user->id }}" data-license="{{ asset('storage/' . $user->driving_license) }}" data-name="{{ $user->name }}">
+                                                <i class="fas fa-user-check me-2 text-success"></i> Verify Account
+                                            </a></li>
+                                        @endif
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?');">
@@ -144,15 +160,62 @@
     </div>
 </div>
 
+<!-- Verification Modal -->
+<div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 bg-dark text-white p-4">
+                <h5 class="modal-title fw-bold">Verify Driving License</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <h6 class="mb-3">Reviewing document for <span id="verifyName" class="fw-bold text-primary"></span></h6>
+                <div class="bg-light rounded-4 p-3 mb-4">
+                    <img id="licenseImg" src="" class="img-fluid rounded shadow-sm" style="max-height: 400px;" alt="License Image">
+                </div>
+                <p class="text-muted small">Ensure the name on the license matches the registered user name and the document is valid.</p>
+            </div>
+            <div class="modal-footer border-0 p-4 gap-2">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                <form id="verifyForm" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">Approve & Verify</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Simple Client-Side Search
-    document.getElementById('userSearch').addEventListener('keyup', function() {
-        let value = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#usersTableBody tr');
-        
-        rows.forEach(function(row) {
-            let text = row.textContent.toLowerCase();
-            row.style.display = text.indexOf(value) > -1 ? '' : 'none';
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple Client-Side Search
+        document.getElementById('userSearch').addEventListener('keyup', function() {
+            let value = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#usersTableBody tr');
+            
+            rows.forEach(function(row) {
+                let text = row.textContent.toLowerCase();
+                row.style.display = text.indexOf(value) > -1 ? '' : 'none';
+            });
+        });
+
+        // Verification Modal Logic
+        const verifyButtons = document.querySelectorAll('.verify-btn');
+        const verifyForm = document.getElementById('verifyForm');
+        const verifyName = document.getElementById('verifyName');
+        const licenseImg = document.getElementById('licenseImg');
+
+        verifyButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.dataset.userId;
+                const name = this.dataset.name;
+                const license = this.dataset.license;
+
+                verifyName.textContent = name;
+                licenseImg.src = license;
+                verifyForm.action = `{{ url('admin/users') }}/${userId}/verify`;
+            });
         });
     });
 </script>
