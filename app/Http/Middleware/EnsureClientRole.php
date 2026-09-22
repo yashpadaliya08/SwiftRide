@@ -25,7 +25,7 @@ class EnsureClientRole
         }
 
         // Check if user has client role (database uses 'user' for clients)
-        if ($user->role !== 'user') {
+        if ($user->role && $user->role !== 'user') {
             Auth::guard('web')->logout();
             return redirect()->route('client.auth')->withErrors([
                 'auth' => 'Access denied. Client accounts only.',

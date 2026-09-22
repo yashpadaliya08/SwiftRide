@@ -38,7 +38,6 @@ class AdminBookingNotificationMail extends Mailable
      */
     public function content(): Content
     {
-        $confirmUrl = route('admin.bookings.confirm', $this->booking->id);
         $viewUrl = route('admin.bookings.show', $this->booking->id);
 
         return new Content(
@@ -47,7 +46,6 @@ class AdminBookingNotificationMail extends Mailable
                 'booking' => $this->booking,
                 'car' => $this->booking->car,
                 'user' => $this->booking->user,
-                'confirmUrl' => $confirmUrl,
                 'viewUrl' => $viewUrl,
             ],
         );

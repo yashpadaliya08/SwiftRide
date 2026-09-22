@@ -17,14 +17,8 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 // These routes redirect to /auth which is handled by ClientAuthController in web.php
 // --------------------
 Route::middleware('guest')->group(function () {
-    // Redirect old Breeze routes to our custom auth page
-    Route::get('login', function () {
-        return redirect('/auth');
-    })->name('login');
-    
-    Route::get('register', function () {
-        return redirect('/auth');
-    })->name('register');
+    Route::get('login', [\App\Http\Controllers\Client\ClientAuthController::class, 'showAuthForm'])->name('login');
+    Route::get('register', [\App\Http\Controllers\Client\ClientAuthController::class, 'showAuthForm'])->name('register');
 
     // Password reset routes (if needed)
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');

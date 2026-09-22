@@ -103,6 +103,11 @@ class CarController extends Controller
             'price_per_day' => 'required|numeric',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'type' => 'nullable|string|max:50',
+            'status' => 'required|in:available,unavailable',
+            'transmission' => 'required|in:manual,automatic',
+            'fuel_type' => 'required|in:petrol,diesel,electric,hybrid',
+            'seats' => 'required|integer|min:1|max:50',
         ]);
 
         $car = Car::findOrFail($id);
@@ -114,7 +119,12 @@ class CarController extends Controller
             'year',
             'color',
             'price_per_day',
-            'description'
+            'description',
+            'type',
+            'status',
+            'transmission',
+            'fuel_type',
+            'seats',
         ]);
 
         // If new image uploaded, store it

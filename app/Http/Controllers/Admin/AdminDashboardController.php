@@ -80,7 +80,7 @@ class AdminDashboardController extends Controller
 
     public function calendar()
     {
-        $bookings = Booking::with('car')->get()->map(function ($booking) {
+        $bookings = Booking::with('car', 'user')->get()->map(function ($booking) {
             $color = match($booking->status) {
                 'confirmed' => '#198754', // Green
                 'pending' => '#ffc107',   // Yellow
@@ -90,7 +90,7 @@ class AdminDashboardController extends Controller
             };
 
             return [
-                'title' => ($booking->car->brand ?? 'Car') . ' ' . ($booking->car->model ?? '') . ' (' . $booking->user->name . ')',
+                'title' => ($booking->car?->brand ?? 'Car') . ' ' . ($booking->car?->model ?? '') . ' (' . ($booking->user?->name ?? 'Guest') . ')',
                 'start' => $booking->start_datetime->toIso8601String(),
                 'end' => $booking->end_datetime->toIso8601String(),
                 'backgroundColor' => $color,

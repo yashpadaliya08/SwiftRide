@@ -67,7 +67,7 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label fw-bold small text-uppercase text-muted">Wait, Transmission <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold small text-uppercase text-muted">Transmission <span class="text-danger">*</span></label>
                                 <select class="form-select" name="transmission" required>
                                     <option value="automatic" selected>Automatic</option>
                                     <option value="manual">Manual</option>

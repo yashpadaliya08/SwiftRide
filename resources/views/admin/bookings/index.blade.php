@@ -5,14 +5,14 @@
 @section('content')
 <div class="container-fluid py-4">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <div>
             <h2 class="mb-1 fw-bold text-dark">Booking Management</h2>
             <p class="text-muted mb-0">Track and manage all vehicle reservations.</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-white border shadow-sm" onclick="window.print()">
-                <i class="fas fa-print me-2"></i> Export
+                <i class="fas fa-print me-2"></i> Export / Print
             </button>
             <a href="#" class="btn btn-primary shadow-sm" onclick="alert('Manual booking creation coming soon')">
                 <i class="fas fa-plus me-2"></i> New Booking
@@ -21,7 +21,7 @@
     </div>
 
     <!-- Booking Stats -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-4 no-print">
         <div class="col-md-3">
              <div class="card border-0 shadow-sm bg-primary text-white h-100">
                 <div class="card-body">
@@ -58,7 +58,7 @@
 
     <!-- Bookings Tabs & Table -->
     <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-header bg-white border-bottom py-3">
+        <div class="card-header bg-white border-bottom py-3 no-print">
             <ul class="nav nav-pills card-header-pills" id="bookingTabs" role="tablist">
                 <li class="nav-item">
                     <button class="nav-link active fw-bold" data-filter="all">All Bookings</button>
@@ -76,11 +76,18 @@
         </div>
         
         <!-- Search -->
-         <div class="p-3 bg-light border-bottom">
+         <div class="p-3 bg-light border-bottom no-print">
              <div class="input-group">
                  <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
                  <input type="text" class="form-control bg-white border-start-0" placeholder="Search by Order ID, User, or Car..." id="bookingSearch">
              </div>
+        </div>
+
+        <!-- Print Header Info -->
+        <div class="d-none d-print-block p-4 border-bottom mb-4">
+            <h2 class="fw-black text-dark mb-1" style="font-weight: 800; letter-spacing: -1px;">SWIFTRIDE<span style="color: #ff3333;">.</span></h2>
+            <h4 class="fw-bold text-dark mt-2">Active Booking & Reservation Ledger</h4>
+            <p class="text-muted small mb-0">Ledger Generated on: {{ now()->format('F d, Y h:i A') }}</p>
         </div>
 
         <div class="table-responsive">
@@ -92,7 +99,7 @@
                         <th>Dates</th>
                         <th>Total Price</th>
                         <th>Status</th>
-                        <th class="text-end pe-4">Action</th>
+                        <th class="text-end pe-4 no-print">Action</th>
                     </tr>
                 </thead>
                 <tbody id="bookingsTableBody">
@@ -100,7 +107,7 @@
                         <tr class="booking-row" data-status="{{ $booking->status }}">
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                     <div class="bg-light rounded p-2 me-3 border text-center" style="width: 50px; height: 50px;">
+                                     <div class="bg-light rounded p-2 me-3 border text-center d-print-none" style="width: 50px; height: 50px;">
                                         <i class="fas fa-car-side text-secondary fa-lg mt-1"></i>
                                      </div>
                                      <div>
@@ -136,7 +143,7 @@
                                     {{ $booking->status }}
                                 </span>
                             </td>
-                            <td class="text-end pe-4">
+                            <td class="text-end pe-4 no-print">
                                 <a href="{{ route('admin.bookings.show', $booking->id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                     View Details
                                 </a>
@@ -152,6 +159,80 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* PREMIUM PRINT STYLES */
+    @media print {
+        /* Completely hide navigation, controls, headers, filters, sidebars */
+        .sidebar-container, 
+        .admin-navbar, 
+        .btn-group, 
+        .btn, 
+        #bookingTabs, 
+        #bookingSearch, 
+        .input-group, 
+        .p-3.bg-light.border-bottom, 
+        .toast-container,
+        #liveToast,
+        nav,
+        .d-flex.gap-2,
+        header,
+        .no-print,
+        .d-print-none {
+            display: none !important;
+        }
+
+        /* Reset margins and paddings */
+        body, 
+        main, 
+        .container-fluid, 
+        .py-4 {
+            background: #fff !important;
+            color: #000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            height: auto !important;
+            min-height: auto !important;
+        }
+
+        /* Printable list boundaries */
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+            background: #fff !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .table-responsive {
+            border: none !important;
+            overflow: visible !important;
+        }
+
+        .table {
+            width: 100% !important;
+        }
+
+        th {
+            border-bottom: 2px solid #334155 !important;
+            color: #000 !important;
+            font-weight: bold !important;
+        }
+
+        td {
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -186,11 +267,6 @@
             let value = this.value.toLowerCase();
             rows.forEach(function(row) {
                 let text = row.textContent.toLowerCase();
-                // Only search visible rows (optional, but good)
-                // Actually, let's search all and override filter for search result clarity? 
-                // No, adhering to current tab filter + search is tricky.
-                // Simple version: Search ignores tabs or searches within tabs.
-                // Let's Search ALL rows for simplicity:
                 row.style.display = text.indexOf(value) > -1 ? '' : 'none';
             });
         });

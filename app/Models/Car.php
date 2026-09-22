@@ -21,6 +21,11 @@ class Car extends Model
         return $this->hasMany(Review::class)->where('is_approved', true);
     }
 
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
     public function averageRating()
     {
         return round($this->approvedReviews()->avg('rating'), 1) ?: 0;

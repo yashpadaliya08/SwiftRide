@@ -223,15 +223,13 @@
         </div>
 
         <div class="action-buttons">
-            <a href="{{ $confirmUrl }}" class="button button-primary">✓ Confirm Booking</a>
-            <a href="{{ $viewUrl }}" class="button button-secondary">View Details</a>
+            <a href="{{ $viewUrl }}" class="button button-primary">Review & Confirm Booking</a>
         </div>
 
         <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0; color: #0369a1;">
                 <strong>Quick Actions:</strong><br>
-                • Click "Confirm Booking" to approve and record revenue<br>
-                • Click "View Details" to see full booking information in admin panel
+                • Click "Review & Confirm Booking" to open the booking details in the admin portal where you can verify customer information and confirm or manage the reservation.
             </p>
         </div>
 

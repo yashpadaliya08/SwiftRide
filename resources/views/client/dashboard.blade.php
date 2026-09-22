@@ -23,7 +23,7 @@
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100 py-2">
                     <div class="card-body d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background-color: rgba(224, 36, 36, 0.12); color: #e02424;">
                             <i class="fas fa-route fa-lg"></i>
                         </div>
                         <div>
@@ -36,7 +36,7 @@
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100 py-2">
                     <div class="card-body d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background-color: rgba(16, 185, 129, 0.12); color: #10b981;">
                             <i class="fas fa-wallet fa-lg"></i>
                         </div>
                         <div>
@@ -49,7 +49,7 @@
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100 py-2">
                     <div class="card-body d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background-color: rgba(245, 158, 11, 0.12); color: #d97706;">
                             <i class="fas fa-star fa-lg"></i>
                         </div>
                         <div>

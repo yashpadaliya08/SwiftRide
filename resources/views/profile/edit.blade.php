@@ -93,19 +93,19 @@
                             <div class="mb-4">
                                 <label class="form-label small fw-bold text-muted text-uppercase">Current Password</label>
                                 <input type="password" name="current_password" class="form-control bg-light border-0 py-3">
-                                @error('current_password') <small class="text-danger">{{ $message }}</small> @enderror
+                                @error('current_password', 'updatePassword') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
                             <div class="mb-4">
                                 <label class="form-label small fw-bold text-muted text-uppercase">New Password</label>
                                 <input type="password" name="password" class="form-control bg-light border-0 py-3">
-                                @error('password') <small class="text-danger">{{ $message }}</small> @enderror
+                                @error('password', 'updatePassword') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
                             <div class="mb-4">
                                 <label class="form-label small fw-bold text-muted text-uppercase">Confirm New Password</label>
                                 <input type="password" name="password_confirmation" class="form-control bg-light border-0 py-3">
-                                @error('password_confirmation') <small class="text-danger">{{ $message }}</small> @enderror
+                                @error('password_confirmation', 'updatePassword') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
                             <div class="d-flex align-items-center gap-3">

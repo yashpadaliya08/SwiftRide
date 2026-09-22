@@ -49,7 +49,7 @@ class Booking extends Model
 
     public static function autoCompleteExpiredBookings()
     {
-        return self::where('status', '!=', 'completed')
+        return self::where('status', 'confirmed')
             ->where('end_datetime', '<', Carbon::now())
             ->update(['status' => 'completed']);
     }

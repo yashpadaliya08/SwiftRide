@@ -94,11 +94,15 @@ class BookingController extends Controller
         if ($max_price) {
             $availableCars = $availableCars->where('price_per_day', '<=', $max_price);
         }
-        if ($transmission && $transmission !== 'All') {
-            $availableCars = $availableCars->where('transmission', $transmission);
+        if ($transmission && strtolower($transmission) !== 'all') {
+            $availableCars = $availableCars->filter(function ($car) use ($transmission) {
+                return strtolower($car->transmission ?? '') === strtolower($transmission);
+            });
         }
-        if ($fuel_type && $fuel_type !== 'All') {
-            $availableCars = $availableCars->where('fuel_type', $fuel_type);
+        if ($fuel_type && strtolower($fuel_type) !== 'all') {
+            $availableCars = $availableCars->filter(function ($car) use ($fuel_type) {
+                return strtolower($car->fuel_type ?? '') === strtolower($fuel_type);
+            });
         }
 
         // Sorting
@@ -230,10 +234,6 @@ class BookingController extends Controller
     {
         $booking = Booking::with('car')->where('user_id', Auth::id())->findOrFail($id);
 
-        if ($booking->status !== 'pending') {
-            return redirect()->route('booking.myBookings')->with('info', 'This booking has already been processed.');
-        }
-
         return view('client.booking.payment', compact('booking'));
     }
 
@@ -246,6 +246,11 @@ class BookingController extends Controller
             abort(403);
         }
 
+        // Idempotency: prevent duplicate payment, revenue entries, and loyalty points
+        if ($booking->status !== 'pending') {
+            return redirect()->route('booking.payment', $booking->id)->with('info', 'This booking has already been paid for.');
+        }
+
         // 1. Update status to Confirmed
         $booking->status = 'confirmed';
         $booking->save();
@@ -253,8 +258,8 @@ class BookingController extends Controller
         Revenue::create([
             'booking_id' => $booking->id,
             'amount' => $booking->total_price,
-            'type' => 'payment',
-            'status' => 'received',
+            'type' => Revenue::TYPE_PAYMENT,
+            'status' => Revenue::STATUS_RECEIVED,
         ]);
 
         // 3. Award Loyalty Points
@@ -290,8 +295,6 @@ class BookingController extends Controller
             }
         }
 
-        // Simulate a slight delay for realism if needed, but not necessary for logic
-        
         return redirect()->route('booking.success', $booking->id);
     }
 
@@ -342,23 +345,46 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
 
+        // Security IDOR check
+        if ($booking->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         if ($booking->status === 'cancelled') {
             return back()->with('error', 'Booking already cancelled.');
         }
+
+        if ($booking->status === 'completed') {
+            return back()->with('error', 'Completed bookings cannot be cancelled.');
+        }
+
+        $wasConfirmed = ($booking->status === 'confirmed');
 
         // 1. Update booking status
         $booking->status = 'cancelled';
         $booking->save();
 
-        // 2. Create refund revenue
-        Revenue::create([
-            'booking_id' => $booking->id,
-            'amount' => -$booking->total_price,
-            'type' => Revenue::TYPE_REFUND,
-            'status' => Revenue::STATUS_REFUNDED,
-        ]);
+        // 2. Only refund revenue and deduct loyalty points if booking was confirmed/paid
+        if ($wasConfirmed) {
+            Revenue::create([
+                'booking_id' => $booking->id,
+                'amount' => -$booking->total_price,
+                'type' => Revenue::TYPE_REFUND,
+                'status' => Revenue::STATUS_REFUNDED,
+            ]);
 
-        return back()->with('success', 'Booking cancelled and refund recorded.');
+            $user = Auth::user();
+            $deductedPoints = floor($booking->total_price / 100);
+            $user->loyalty_points = max(0, $user->loyalty_points - $deductedPoints);
+            if ($user->loyalty_points < 5000) {
+                $user->membership_tier = 'Standard';
+            } elseif ($user->loyalty_points < 15000) {
+                $user->membership_tier = 'Gold';
+            }
+            $user->save();
+        }
+
+        return back()->with('success', 'Booking cancelled successfully.');
     }
 
 public function myBookingsData(Request $request)

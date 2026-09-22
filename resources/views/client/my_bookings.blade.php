@@ -15,13 +15,13 @@
                 <i class="fas fa-plus me-2"></i>New Adventure
             </a>
             <div class="dropdown">
-                <button class="btn btn-outline-dark rounded-pill dropdown-toggle px-4" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-filter me-2"></i>Filter
+                <button class="btn btn-outline-dark rounded-pill dropdown-toggle px-4 fw-semibold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-filter me-2 text-primary"></i>Filter
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2">
-                    <li><a class="dropdown-item rounded-3 mb-1" href="#all" data-bs-toggle="tab">All Bookings</a></li>
-                    <li><a class="dropdown-item rounded-3 mb-1" href="#upcoming" data-bs-toggle="tab">Upcoming Trips</a></li>
-                    <li><a class="dropdown-item rounded-3" href="#completed" data-bs-toggle="tab">Past Trips</a></li>
+                    <li><a class="dropdown-item rounded-3 mb-1" href="#all" data-bs-toggle="tab"><i class="fas fa-layer-group me-2 text-muted"></i>All Bookings</a></li>
+                    <li><a class="dropdown-item rounded-3 mb-1" href="#upcoming" data-bs-toggle="tab"><i class="fas fa-clock me-2 text-primary"></i>Upcoming Trips</a></li>
+                    <li><a class="dropdown-item rounded-3" href="#completed" data-bs-toggle="tab"><i class="fas fa-check-circle me-2 text-success"></i>Past Trips</a></li>
                 </ul>
             </div>
         </div>
@@ -153,17 +153,48 @@
 </div>
 
 <style>
-    .nav-pills .nav-link {
-        color: #6c757d;
-        background: none;
+    #bookingTab .nav-link {
+        color: #475569 !important;
+        background: transparent !important;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 0.55rem 1.35rem !important;
+        transition: all 0.2s ease;
     }
-    .nav-pills .nav-link.active {
-        color: #fff !important;
+    #bookingTab .nav-link:hover {
+        color: #0f172a !important;
+        background: rgba(0, 0, 0, 0.05) !important;
+    }
+    #bookingTab .nav-link.active {
+        color: #ffffff !important;
         background: #0d1117 !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     }
-    .dropdown-item:active {
-        background-color: #d12e2e;
+    .dropdown-menu {
+        background: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+        min-width: 190px;
+    }
+    .dropdown-menu .dropdown-item {
+        color: #1e293b !important;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.6rem 1rem !important;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+    }
+    .dropdown-menu .dropdown-item:hover {
+        background-color: #f8fafc !important;
+        color: #e02424 !important;
+        transform: translateX(4px);
+    }
+    .dropdown-menu .dropdown-item.active,
+    .dropdown-menu .dropdown-item:active {
+        background-color: rgba(224, 36, 36, 0.1) !important;
+        color: #e02424 !important;
     }
 </style>
 @endsection
@@ -206,10 +237,15 @@
             setRating(val);
         }
 
-        // Optional: Smoothly switch tabs via URL hash or dropdown
-        $('a[data-bs-toggle="tab"]').on('click', function (e) {
+        // Smoothly switch tabs via dropdown filter and sync with nav-pills
+        $('.dropdown-menu a[data-bs-toggle="tab"]').on('click', function (e) {
             e.preventDefault();
-            $(this).tab('show');
+            let target = $(this).attr('href');
+            let tabBtn = document.querySelector(`#bookingTab button[data-bs-target="${target}"]`);
+            if (tabBtn) {
+                let tabTrigger = new bootstrap.Tab(tabBtn);
+                tabTrigger.show();
+            }
         });
     });
 </script>

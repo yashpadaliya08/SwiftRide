@@ -36,25 +36,10 @@ class AdminAuthController extends Controller
         ])->withInput($request->only('email'));
     }
 
-    // Admin register
+    // Admin register (disabled for security)
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'admin',
-        ]);
-
-       Auth::guard('admin')->login($user);
-
-        return redirect()->route('admin.dashboard');
+        abort(403, 'Public administrator registration is disabled.');
     }
 
     // Admin logout
